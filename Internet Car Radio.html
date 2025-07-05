@@ -136,8 +136,8 @@
 
         @media (min-width: 1400px) {
             .favorites-section {
-                grid-template-columns: repeat(6, 1fr);
-                grid-template-rows: repeat(2, 1fr);
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(4, 1fr);
             }
         }
 
@@ -448,6 +448,10 @@
         <div class="favorite-btn empty" data-index="9">Empty Slot</div>
         <div class="favorite-btn empty" data-index="10">Empty Slot</div>
         <div class="favorite-btn empty" data-index="11">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="12">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="13">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="14">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="15">Empty Slot</div>
     </div>
 
     <div class="modal" id="searchModal">
@@ -769,7 +773,7 @@
             let targetIndex = 0;
             let oldestTime = Date.now();
 
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 16; i++) {
                 if (!favorites[i]) {
                     targetIndex = i;
                     break;
