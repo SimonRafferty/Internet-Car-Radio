@@ -22,16 +22,29 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            /* Ensure consistent viewport behavior */
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Handle mobile viewport issues */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+            }
         }
 
         .top-controls {
-            height: 10vh;
+            height: 60px;
+            min-height: 60px;
             background: #111111;
             border-bottom: 2px solid #333333;
             display: flex;
             align-items: center;
             padding: 0 20px;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .now-playing {
@@ -39,6 +52,16 @@
             font-size: 18px;
             font-weight: bold;
             color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .car-radio-icon {
+            width: 40px;
+            height: 40px;
+            fill: #ffffff;
+            flex-shrink: 0;
         }
 
         .control-buttons {
@@ -84,16 +107,20 @@
 
         /* Responsive grid system - uses auto-fit for true responsiveness */
         .favorites-section {
-            height: 90vh;
+            flex: 1;
             padding: 10px;
             display: grid;
             gap: 8px;
             background: #111111;
             overflow-y: auto;
+            overflow-x: hidden;
             
             /* Responsive columns: auto-fit based on minimum column width */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            grid-auto-rows: minmax(120px, 1fr);
+            grid-auto-rows: minmax(120px, max-content);
+            
+            /* Ensure proper scrolling */
+            min-height: 0;
         }
 
         /* Ensure minimum widths work on smaller screens */
@@ -194,13 +221,23 @@
 
         .modal-content {
             background: #111111;
-            margin: 20px;
-            padding: 20px;
+            margin: 10px;
+            padding: 15px;
             border-radius: 15px;
-            height: calc(100vh - 40px);
+            height: calc(100vh - 20px);
+            max-height: calc(100vh - 20px);
             display: flex;
             flex-direction: column;
             border: 2px solid #333333;
+            overflow: hidden;
+        }
+
+        /* Handle mobile viewport issues for modal */
+        @supports (-webkit-touch-callout: none) {
+            .modal-content {
+                height: calc(-webkit-fill-available - 20px);
+                max-height: calc(-webkit-fill-available - 20px);
+            }
         }
 
         .control-btn.delete {
@@ -252,11 +289,13 @@
         .stations-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            grid-auto-rows: minmax(100px, 1fr);
+            grid-auto-rows: minmax(100px, max-content);
             gap: 10px;
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 5px;
+            min-height: 0;
         }
 
         /* Responsive stations grid */
@@ -433,13 +472,39 @@
 
     <!-- Top controls -->
     <div class="top-controls">
-        <div class="now-playing" id="nowPlaying">Select a station to play</div>
+        <div class="now-playing" id="nowPlaying">
+            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <!-- WiFi signal -->
+                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                
+                <!-- Car body -->
+                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                
+                <!-- Car details -->
+                <circle cx="64" cy="160" r="16" fill="#333"/>
+                <circle cx="192" cy="160" r="16" fill="#333"/>
+                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                
+                <!-- Windshield -->
+                <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+            </svg>
+            <span>Select a station to play</span>
+        </div>
         <div class="control-buttons">
             <button class="control-btn play" id="playBtn">▶</button>
             <button class="control-btn pause" id="pauseBtn" style="display: none;">⏸</button>
             <button class="control-btn add" id="addBtn">+</button>
             <button class="control-btn delete" id="deleteBtn">✕</button>
             <button class="control-btn" id="searchBtn">Search</button>
+            <button class="control-btn" id="fullscreenBtn">⛶</button>
         </div>
     </div>
 
@@ -609,11 +674,105 @@
 
             return groups;
         }
+        // Fullscreen functionality with better cross-browser support
+        function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    
+                    // Enter fullscreen - try different methods
+                    const docEl = document.documentElement;
+                    
+                    if (docEl.requestFullscreen) {
+                        docEl.requestFullscreen().catch(err => {
+                            console.log('Fullscreen request failed:', err);
+                            showFeedbackMessage('Fullscreen not supported');
+                        });
+                    } else if (docEl.webkitRequestFullscreen) {
+                        // Safari/Chrome
+                        docEl.webkitRequestFullscreen();
+                    } else if (docEl.webkitRequestFullScreen) {
+                        // Older Safari
+                        docEl.webkitRequestFullScreen();
+                    } else if (docEl.mozRequestFullScreen) {
+                        // Firefox
+                        docEl.mozRequestFullScreen();
+                    } else if (docEl.msRequestFullscreen) {
+                        // IE/Edge
+                        docEl.msRequestFullscreen();
+                    } else {
+                        // Fallback for unsupported browsers
+                        console.log('Fullscreen API not supported');
+                        showFeedbackMessage('Fullscreen not supported in this browser');
+                        return;
+                    }
+                    
+                    // Hide address bar on mobile as fallback
+                    setTimeout(() => {
+                        window.scrollTo(0, 1);
+                    }, 100);
+                    
+                } else {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(err => {
+                            console.log('Exit fullscreen failed:', err);
+                        });
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.webkitCancelFullScreen) {
+                        document.webkitCancelFullScreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            } catch (error) {
+                console.error('Fullscreen error:', error);
+                showFeedbackMessage('Fullscreen operation failed');
+            }
+        }
+
+        // Update fullscreen button text based on state - with better browser detection
+        function updateFullscreenButton() {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (fullscreenBtn) {
+                const isFullscreen = !!(document.fullscreenElement || 
+                                       document.webkitFullscreenElement || 
+                                       document.mozFullScreenElement || 
+                                       document.msFullscreenElement);
+                
+                if (isFullscreen) {
+                    fullscreenBtn.textContent = '⛉'; // Exit fullscreen icon
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                } else {
+                    fullscreenBtn.textContent = '⛶'; // Enter fullscreen icon
+                    fullscreenBtn.title = 'Enter Fullscreen';
+                }
+            }
+        }
+
+        // Check if fullscreen is supported
+        function isFullscreenSupported() {
+            const docEl = document.documentElement;
+            return !!(docEl.requestFullscreen || 
+                     docEl.webkitRequestFullscreen || 
+                     docEl.webkitRequestFullScreen ||
+                     docEl.mozRequestFullScreen || 
+                     docEl.msRequestFullscreen);
+        }
+
+        // Handle viewport height changes (especially on mobile)
+        function handleViewportResize() {
+            // Update CSS custom property for actual viewport height
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        
         function truncateText(text, maxLength) {
             return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
         }
-        
-        // Audio functions
         async function playStation(station) {
             currentStation = station;
             saveLastPlayed(station);
@@ -623,7 +782,32 @@
                 const audio = document.getElementById('audioPlayer');
                 audio.src = station.url;
                 await audio.play();
-                document.getElementById('nowPlaying').textContent = `♪ ${station.name}`;
+                document.getElementById('nowPlaying').innerHTML = `
+                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <!-- WiFi signal -->
+                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                        
+                        <!-- Car body -->
+                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                        
+                        <!-- Car details -->
+                        <circle cx="64" cy="160" r="16" fill="#333"/>
+                        <circle cx="192" cy="160" r="16" fill="#333"/>
+                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        
+                        <!-- Windshield -->
+                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                    </svg>
+                    <span>♪ ${station.name}</span>
+                `;
                 
                 // Clear retry state if successful
                 if (isRetrying) {
@@ -643,7 +827,32 @@
             // Only show retry message if we were actually playing a station AND user intended to play
             if (currentStation && isPlaying && !isRetrying) {
                 isRetrying = true;
-                document.getElementById('nowPlaying').textContent = 'Connectivity lost - retrying...';
+                document.getElementById('nowPlaying').innerHTML = `
+                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <!-- WiFi signal -->
+                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                        
+                        <!-- Car body -->
+                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                        
+                        <!-- Car details -->
+                        <circle cx="64" cy="160" r="16" fill="#333"/>
+                        <circle cx="192" cy="160" r="16" fill="#333"/>
+                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        
+                        <!-- Windshield -->
+                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                    </svg>
+                    <span>Connectivity lost - retrying...</span>
+                `;
                 
                 // Start retry attempts every 10 seconds (increased from 5)
                 retryInterval = setInterval(async () => {
@@ -653,7 +862,32 @@
                         isRetrying = false;
                         clearInterval(retryInterval);
                         retryInterval = null;
-                        document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                        document.getElementById('nowPlaying').innerHTML = `
+                            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                                <!-- WiFi signal -->
+                                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                                <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                                
+                                <!-- Car body -->
+                                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                                
+                                <!-- Car details -->
+                                <circle cx="64" cy="160" r="16" fill="#333"/>
+                                <circle cx="192" cy="160" r="16" fill="#333"/>
+                                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                
+                                <!-- Windshield -->
+                                <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                            </svg>
+                            <span>⏸ ${currentStation.name}</span>
+                        `;
                         return;
                     }
                     
@@ -667,7 +901,32 @@
                         isRetrying = false;
                         clearInterval(retryInterval);
                         retryInterval = null;
-                        document.getElementById('nowPlaying').textContent = `♪ ${currentStation.name}`;
+                        document.getElementById('nowPlaying').innerHTML = `
+                            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                                <!-- WiFi signal -->
+                                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                                <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                                
+                                <!-- Car body -->
+                                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                                
+                                <!-- Car details -->
+                                <circle cx="64" cy="160" r="16" fill="#333"/>
+                                <circle cx="192" cy="160" r="16" fill="#333"/>
+                                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                                
+                                <!-- Windshield -->
+                                <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                            </svg>
+                            <span>♪ ${currentStation.name}</span>
+                        `;
                         console.log('Successfully reconnected and resumed playback');
                         
                     } catch (retryError) {
@@ -677,7 +936,32 @@
                 }, 10000);
             } else if (currentStation && !isRetrying) {
                 // Station selected but not playing - just show error without retry
-                document.getElementById('nowPlaying').textContent = 'Error playing station';
+                document.getElementById('nowPlaying').innerHTML = `
+                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <!-- WiFi signal -->
+                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                        
+                        <!-- Car body -->
+                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                        
+                        <!-- Car details -->
+                        <circle cx="64" cy="160" r="16" fill="#333"/>
+                        <circle cx="192" cy="160" r="16" fill="#333"/>
+                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        
+                        <!-- Windshield -->
+                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                    </svg>
+                    <span>Error playing station</span>
+                `;
             }
         }
         
@@ -894,7 +1178,7 @@
             }
         }
         
-        // Station fetching - modified to fetch by page
+        async function playStation(station) {
         async function fetchStationsPage(genre, page = 0) {
             const offset = page * 12;
             const apiUrl = `https://de1.api.radio-browser.info/json/stations/bytag/${encodeURIComponent(genre)}?hidebroken=true&limit=12&offset=${offset}&order=votes&reverse=true`;
@@ -1016,7 +1300,7 @@
             }
         }
         
-        // Pagination functions - modified for responsive grid
+        // Station fetching - modified to fetch by page
         function displayCurrentPage() {
             if (currentStations.length === 0) {
                 document.getElementById('stationsGrid').innerHTML = '<div class="loading">No stations found for this genre</div>';
@@ -1119,7 +1403,7 @@
             }
         }
         
-        // Global functions for onclick handlers
+        // Pagination functions - modified for responsive grid
         function selectGenre(genre) {
             console.log('Genre selected:', genre);
             
@@ -1311,7 +1595,7 @@
             }
         }
         
-        // Initialize when DOM loads
+        // Global functions for onclick handlers
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, setting up radio app...');
             
@@ -1331,6 +1615,7 @@
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             const modalAddBtn = document.getElementById('modalAddBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
             
             // Set up audio events with increased buffering tolerance
             audio.addEventListener('play', function() {
@@ -1356,7 +1641,32 @@
                 
                 // Update display to show paused state
                 if (currentStation) {
-                    document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                    document.getElementById('nowPlaying').innerHTML = `
+                        <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                            <!-- WiFi signal -->
+                            <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                            <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                            <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                            
+                            <!-- Car body -->
+                            <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                            <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                            
+                            <!-- Car details -->
+                            <circle cx="64" cy="160" r="16" fill="#333"/>
+                            <circle cx="192" cy="160" r="16" fill="#333"/>
+                            <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                            <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                            <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                            <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                            <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                            
+                            <!-- Windshield -->
+                            <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                            <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                        </svg>
+                        <span>⏸ ${currentStation.name}</span>
+                    `;
                 }
             });
             
@@ -1471,12 +1781,40 @@
                 });
             }
             
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function() {
+                    console.log('Fullscreen button clicked');
+                    toggleFullscreen();
+                });
+            }
+            
             // Set up favorite buttons
             document.querySelectorAll('.favorite-btn').forEach((btn, index) => {
                 btn.addEventListener('click', function() {
                     playFavorite(index);
                 });
             });
+            
+            // Set up fullscreen event listeners with all browser prefixes
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('msfullscreenchange', updateFullscreenButton);
+            
+            // Hide fullscreen button if not supported
+            if (fullscreenBtn && !isFullscreenSupported()) {
+                fullscreenBtn.style.display = 'none';
+                console.log('Fullscreen API not supported, hiding button');
+            }
+            
+            // Handle viewport changes (especially important for mobile)
+            window.addEventListener('resize', handleViewportResize);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(handleViewportResize, 100);
+            });
+            
+            // Initialize viewport handling
+            handleViewportResize();
             
             // Auto-resume last played station on startup
             const lastPlayed = loadLastPlayed();
@@ -1485,7 +1823,32 @@
                 // Set current station and update indicators immediately
                 currentStation = lastPlayed;
                 updatePlayingIndicators();
-                document.getElementById('nowPlaying').textContent = `♪ ${lastPlayed.name}`;
+                document.getElementById('nowPlaying').innerHTML = `
+                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                        <!-- WiFi signal -->
+                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
+                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
+                        
+                        <!-- Car body -->
+                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
+                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
+                        
+                        <!-- Car details -->
+                        <circle cx="64" cy="160" r="16" fill="#333"/>
+                        <circle cx="192" cy="160" r="16" fill="#333"/>
+                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
+                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
+                        
+                        <!-- Windshield -->
+                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
+                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
+                    </svg>
+                    <span>♪ ${lastPlayed.name}</span>
+                `;
                 
                 // Function to attempt auto-resume
                 const attemptAutoResume = () => {
@@ -1517,6 +1880,8 @@
             
             console.log('Radio app setup complete');
         });
+        
+        console.log('JavaScript file loaded completely');
         
         console.log('JavaScript file loaded completely');
     </script>
