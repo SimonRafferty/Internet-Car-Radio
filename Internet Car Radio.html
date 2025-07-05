@@ -82,7 +82,7 @@
             border-color: #8f5fe8;
         }
 
-        /* Responsive grid system */
+        /* Responsive grid system - uses auto-fit for true responsiveness */
         .favorites-section {
             height: 90vh;
             padding: 10px;
@@ -91,40 +91,35 @@
             background: #111111;
             overflow-y: auto;
             
-            /* Default: 4 columns x 3 rows */
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            /* Responsive columns: auto-fit based on minimum column width */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-auto-rows: minmax(120px, 1fr);
         }
 
-        /* Tablet view: 3 columns x 4 rows */
-        @media (max-width: 1024px) and (min-width: 768px) {
+        /* Ensure minimum widths work on smaller screens */
+        @media (max-width: 900px) {
             .favorites-section {
-                grid-template-columns: repeat(3, 1fr);
-                grid-template-rows: repeat(4, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
         }
 
-        /* Phone landscape: 3 columns x 4 rows */
-        @media (max-width: 767px) and (orientation: landscape) {
+        @media (max-width: 700px) {
             .favorites-section {
-                grid-template-columns: repeat(3, 1fr);
-                grid-template-rows: repeat(4, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
         }
 
-        /* Phone portrait: 2 columns x 6 rows */
-        @media (max-width: 767px) and (orientation: portrait) {
+        @media (max-width: 500px) {
             .favorites-section {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(6, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
         }
 
-        /* Very small screens: 2 columns, auto rows with scroll */
-        @media (max-width: 480px) {
+        /* For very wide screens, limit to 6 columns max */
+        @media (min-width: 1400px) {
             .favorites-section {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(auto-fit, minmax(120px, 1fr));
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(2, 1fr);
             }
         }
 
@@ -256,11 +251,25 @@
 
         .stations-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-auto-rows: minmax(100px, 1fr);
             gap: 10px;
             flex: 1;
-            overflow: hidden;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        /* Responsive stations grid */
+        @media (max-width: 800px) {
+            .stations-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stations-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
         }
 
         .genre-btn {
@@ -474,7 +483,7 @@
         </div>
     </div>
 
-    <audio id="audioPlayer" preload="none"></audio>
+    <audio id="audioPlayer" preload="none" crossorigin="anonymous"></audio>
 
     <script>
         console.log('Starting JavaScript initialization...');
@@ -631,13 +640,23 @@
         }
 
         function handlePlaybackError() {
-            // Only show retry message if we were actually playing a station
+            // Only show retry message if we were actually playing a station AND user intended to play
             if (currentStation && isPlaying && !isRetrying) {
                 isRetrying = true;
                 document.getElementById('nowPlaying').textContent = 'Connectivity lost - retrying...';
                 
-                // Start retry attempts every 5 seconds
+                // Start retry attempts every 10 seconds (increased from 5)
                 retryInterval = setInterval(async () => {
+                    // Check if user has paused since the error occurred
+                    if (!isPlaying) {
+                        console.log('User paused during retry - stopping retry attempts');
+                        isRetrying = false;
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                        return;
+                    }
+                    
                     try {
                         console.log('Retrying to play station:', currentStation.name);
                         const audio = document.getElementById('audioPlayer');
@@ -655,7 +674,7 @@
                         console.log('Retry attempt failed, will try again...');
                         // Continue retrying
                     }
-                }, 5000);
+                }, 10000);
             } else if (currentStation && !isRetrying) {
                 // Station selected but not playing - just show error without retry
                 document.getElementById('nowPlaying').textContent = 'Error playing station';
@@ -903,17 +922,29 @@
                         station.url_resolved && 
                         station.name && 
                         station.lastcheckok === 1 &&
-                        station.favicon && // Must have a logo/graphic
-                        station.favicon.startsWith('http') // Must be a valid URL
+                        station.lastchecktime_iso8601 && // Has been checked recently
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Checked within last 7 days
                     )
+                    .sort((a, b) => {
+                        // Prioritize stations with logos
+                        const aHasLogo = a.favicon && a.favicon.startsWith('http');
+                        const bHasLogo = b.favicon && b.favicon.startsWith('http');
+                        
+                        if (aHasLogo && !bHasLogo) return -1;
+                        if (!aHasLogo && bHasLogo) return 1;
+                        
+                        // Then sort by votes
+                        return (b.votes || 0) - (a.votes || 0);
+                    })
                     .map(station => ({
                         name: station.name,
                         url: station.url_resolved,
-                        logo: station.favicon,
+                        logo: station.favicon && station.favicon.startsWith('http') ? station.favicon : null,
                         country: station.country,
                         bitrate: station.bitrate,
                         codec: station.codec,
-                        votes: station.votes
+                        votes: station.votes,
+                        lastChecked: station.lastchecktime_iso8601
                     }));
 
                 return filteredStations;
@@ -923,8 +954,69 @@
                 throw new Error(`Failed to load ${genre} stations: ${error.message}`);
             }
         }
+
+        // New function for text search
+        async function searchStationsByName(query) {
+            const apiUrl = `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(query)}?hidebroken=true&limit=50&order=votes&reverse=true`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                console.log(`Searching stations by name: ${query}`);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.contents) {
+                    throw new Error('No contents in proxy response');
+                }
+                
+                const stations = JSON.parse(data.contents);
+                console.log(`Found ${stations.length} stations matching: ${query}`);
+                
+                const filteredStations = stations
+                    .filter(station => 
+                        station.url_resolved && 
+                        station.name && 
+                        station.lastcheckok === 1 &&
+                        station.lastchecktime_iso8601 && // Has been checked recently
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Checked within last 7 days
+                    )
+                    .sort((a, b) => {
+                        // Prioritize stations with logos
+                        const aHasLogo = a.favicon && a.favicon.startsWith('http');
+                        const bHasLogo = b.favicon && b.favicon.startsWith('http');
+                        
+                        if (aHasLogo && !bHasLogo) return -1;
+                        if (!aHasLogo && bHasLogo) return 1;
+                        
+                        // Then sort by votes
+                        return (b.votes || 0) - (a.votes || 0);
+                    })
+                    .slice(0, 12) // Limit to 12 results for grid
+                    .map(station => ({
+                        name: station.name,
+                        url: station.url_resolved,
+                        logo: station.favicon && station.favicon.startsWith('http') ? station.favicon : null,
+                        country: station.country,
+                        bitrate: station.bitrate,
+                        codec: station.codec,
+                        votes: station.votes,
+                        lastChecked: station.lastchecktime_iso8601
+                    }));
+
+                return filteredStations;
+                
+            } catch (error) {
+                console.error(`Error searching stations for ${query}:`, error);
+                throw new Error(`Failed to search stations: ${error.message}`);
+            }
+        }
         
-        // Pagination functions
+        // Pagination functions - modified for responsive grid
         function displayCurrentPage() {
             if (currentStations.length === 0) {
                 document.getElementById('stationsGrid').innerHTML = '<div class="loading">No stations found for this genre</div>';
@@ -949,30 +1041,29 @@
             // Next button disabled if we got less than 12 stations (indicating last page)
             nextBtn.classList.toggle('disabled', currentStations.length < 12);
 
-            // Render stations
+            // Render stations - let CSS Grid handle the responsive layout
             const stationsGrid = document.getElementById('stationsGrid');
             stationsGrid.innerHTML = '';
             
-            for (let i = 0; i < 12; i++) {
+            // Create all station buttons and let CSS Grid auto-place them
+            currentStations.forEach((station, index) => {
                 const stationDiv = document.createElement('div');
+                // Check if station has logo
+                const logoElement = station.logo ? 
+                    `<img src="${station.logo}" class="station-logo-img" onerror="this.style.display='none'">` :
+                    `<div style="font-size: 16px; color: #666;">📻</div>`;
                 
-                if (i < currentStations.length) {
-                    const station = currentStations[i];
-                    // All stations now have valid logos since we filtered them
-                    const logoElement = `<img src="${station.logo}" class="station-logo-img" onerror="this.style.display='none'">`;
-                    
-                    stationDiv.className = 'station-btn';
-                    stationDiv.onclick = () => playStationFromGrid(i);
-                    stationDiv.innerHTML = `
-                        <div style="height: 90%; display: flex; align-items: center; justify-content: center;">
-                            ${logoElement}
-                        </div>
-                        <div class="station-name">${truncateText(station.name, 25)}</div>
-                    `;
-                }
+                stationDiv.className = 'station-btn';
+                stationDiv.onclick = () => playStationFromGrid(index);
+                stationDiv.innerHTML = `
+                    <div style="height: 90%; display: flex; align-items: center; justify-content: center;">
+                        ${logoElement}
+                    </div>
+                    <div class="station-name">${truncateText(station.name, 25)}</div>
+                `;
                 
                 stationsGrid.appendChild(stationDiv);
-            }
+            });
         }
 
         function updateModalNowPlaying() {
@@ -1051,25 +1142,17 @@
             hideModalNowPlaying();
             
             const subGenreList = genreGroups[topGenre] || [];
+            const stationsGrid = document.getElementById('stationsGrid');
+            stationsGrid.innerHTML = '';
 
-            let html = '';
-
-            // Start from index 0, not 1
-            for (let i = 0; i < 12; i++) {
-                if (i < subGenreList.length) {
-                    const subGenre = subGenreList[i];
-                    // Use the exact index i for the onclick
-                    html += `
-                        <div class="genre-btn" onclick="selectSubGenre('${topGenre}', ${i})">
-                            ${subGenre.name}
-                        </div>
-                    `;
-                } else {
-                    html += '<div></div>';
-                }
-            }
-
-            document.getElementById('stationsGrid').innerHTML = html;
+            // Create genre buttons and let CSS Grid auto-place them
+            subGenreList.forEach((subGenre, index) => {
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'genre-btn';
+                genreDiv.onclick = () => selectSubGenre(topGenre, index);
+                genreDiv.textContent = subGenre.name;
+                stationsGrid.appendChild(genreDiv);
+            });
         }
 
         // New function to handle sub-genre selection with proper indexing
@@ -1106,26 +1189,78 @@
         }
 
         function displayTopLevelGenres() {
+            // Show the search input first
+            const searchHtml = `
+                <div class="search-container" style="grid-column: 1 / -1; padding: 15px; background: #222; border-radius: 8px; margin-bottom: 10px;">
+                    <input type="text" id="stationSearchInput" placeholder="Search for station name..." 
+                           style="width: 70%; padding: 10px; margin-right: 10px; border: 2px solid #444; border-radius: 6px; background: #333; color: white; font-size: 16px;">
+                    <button id="searchStationBtn" style="padding: 10px 20px; background: #28a745; border: 2px solid #34ce57; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;">Search</button>
+                </div>
+            `;
+
             // Get the main genre categories that have content
             const mainGenres = Object.keys(genreGroups).filter(key => genreGroups[key].length > 0);
             
             hideModalNowPlaying();
             
-            let html = '';
-            for (let i = 0; i < 12; i++) {
-                if (i < mainGenres.length) {
-                    const genre = mainGenres[i];
-                    html += `
-                        <div class="genre-btn" onclick="selectGenre('${genre}')">
-                            ${genre.toUpperCase()}
-                        </div>
-                    `;
-                } else {
-                    html += '<div></div>';
-                }
-            }
+            const stationsGrid = document.getElementById('stationsGrid');
+            stationsGrid.innerHTML = searchHtml;
             
-            document.getElementById('stationsGrid').innerHTML = html;
+            // Add genre buttons - let CSS Grid auto-place them
+            mainGenres.forEach(genre => {
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'genre-btn';
+                genreDiv.onclick = () => selectGenre(genre);
+                genreDiv.textContent = genre.toUpperCase();
+                stationsGrid.appendChild(genreDiv);
+            });
+            
+            // Set up search functionality
+            const searchInput = document.getElementById('stationSearchInput');
+            const searchBtn = document.getElementById('searchStationBtn');
+            
+            if (searchInput && searchBtn) {
+                const performSearch = async () => {
+                    const query = searchInput.value.trim();
+                    if (query.length < 2) {
+                        alert('Please enter at least 2 characters');
+                        return;
+                    }
+                    
+                    document.getElementById('stationsGrid').innerHTML = '<div class="loading">Searching stations...</div>';
+                    
+                    try {
+                        const stations = await searchStationsByName(query);
+                        currentStations = stations;
+                        currentGenre = `search:${query}`;
+                        currentPage = 0;
+                        
+                        // Push search to navigation stack
+                        navigationStack.push({ 
+                            action: 'showTopLevelGenres', 
+                            title: 'Select Genre'
+                        });
+                        document.getElementById('modalTitle').textContent = `Search: "${query}"`;
+                        
+                        displayCurrentPage();
+                    } catch (error) {
+                        console.error('Search error:', error);
+                        document.getElementById('stationsGrid').innerHTML = `
+                            <div class="loading">
+                                Search failed: ${error.message}<br>
+                                <button class="retry-btn" onclick="showTopLevelGenres()">Back to Genres</button>
+                            </div>
+                        `;
+                    }
+                };
+                
+                searchBtn.addEventListener('click', performSearch);
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
             
             // Clear navigation stack since we're at the top level
             navigationStack = [];
@@ -1197,7 +1332,7 @@
             const nextBtn = document.getElementById('nextBtn');
             const modalAddBtn = document.getElementById('modalAddBtn');
             
-            // Set up audio events
+            // Set up audio events with increased buffering tolerance
             audio.addEventListener('play', function() {
                 isPlaying = true;
                 playBtn.style.display = 'none';
@@ -1208,12 +1343,37 @@
                 isPlaying = false;
                 playBtn.style.display = 'block';
                 pauseBtn.style.display = 'none';
+                
+                // Clear any retry attempts when user explicitly pauses
+                if (isRetrying) {
+                    isRetrying = false;
+                    if (retryInterval) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                    }
+                    console.log('User paused - stopping retry attempts');
+                }
+                
+                // Update display to show paused state
+                if (currentStation) {
+                    document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                }
             });
             
-            audio.addEventListener('error', function() {
-                console.log('Audio error detected');
+            // Only handle error events if they occur during active playback attempts
+            let lastErrorTime = 0;
+            audio.addEventListener('error', function(e) {
+                const now = Date.now();
+                // Debounce error events - only handle if more than 15 seconds since last error
+                if (now - lastErrorTime < 15000) {
+                    console.log('Error event debounced');
+                    return;
+                }
+                lastErrorTime = now;
+                
+                console.log('Audio error detected:', e);
                 // Only handle as error if we were actually trying to play
-                if (isPlaying) {
+                if (isPlaying && currentStation) {
                     handlePlaybackError();
                 }
                 isPlaying = false;
@@ -1221,24 +1381,28 @@
                 pauseBtn.style.display = 'none';
             });
 
+            // Be more lenient with stalled events
+            let stallCount = 0;
             audio.addEventListener('stalled', function() {
-                console.log('Audio stalled');
-                // Only handle as error if we were actually playing
-                if (isPlaying) {
+                stallCount++;
+                console.log(`Audio stalled (count: ${stallCount})`);
+                // Only treat as error after multiple stalls within a short time AND we're supposed to be playing
+                if (stallCount >= 3 && isPlaying && currentStation) {
+                    console.log('Multiple stalls detected - treating as connectivity issue');
                     handlePlaybackError();
+                    stallCount = 0; // Reset counter
                 }
+            });
+
+            // Reset stall counter on successful data loading
+            audio.addEventListener('loadstart', function() {
+                stallCount = 0;
             });
 
             audio.addEventListener('suspend', function() {
                 console.log('Audio suspended (often due to autoplay restrictions)');
-                // Don't treat suspend as an error - it's often just autoplay being blocked
-                // Only handle as error if we were actively playing and then got suspended
-                if (isPlaying) {
-                    console.log('Audio was playing and got suspended - treating as connectivity issue');
-                    handlePlaybackError();
-                } else {
-                    console.log('Audio suspended during autoplay attempt - this is normal');
-                }
+                // Don't treat suspend as an error unless we're actively trying to play
+                // Suspend often happens due to autoplay policies, not connectivity issues
             });
             
             // Set up button events
