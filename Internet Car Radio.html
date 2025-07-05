@@ -22,12 +22,10 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            /* Ensure consistent viewport behavior */
             min-height: 100vh;
             position: relative;
         }
 
-        /* Handle mobile viewport issues */
         @supports (-webkit-touch-callout: none) {
             body {
                 height: -webkit-fill-available;
@@ -52,16 +50,6 @@
             font-size: 18px;
             font-weight: bold;
             color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .car-radio-icon {
-            width: 40px;
-            height: 40px;
-            fill: #ffffff;
-            flex-shrink: 0;
         }
 
         .control-buttons {
@@ -105,7 +93,16 @@
             border-color: #8f5fe8;
         }
 
-        /* Responsive grid system - uses auto-fit for true responsiveness */
+        .control-btn.delete {
+            background: #dc3545;
+            border-color: #ff1e2e;
+            color: #ffffff;
+        }
+
+        .control-btn.delete:hover {
+            background: #ff1e2e;
+        }
+
         .favorites-section {
             flex: 1;
             padding: 10px;
@@ -114,16 +111,11 @@
             background: #111111;
             overflow-y: auto;
             overflow-x: hidden;
-            
-            /* Responsive columns: auto-fit based on minimum column width */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             grid-auto-rows: minmax(120px, max-content);
-            
-            /* Ensure proper scrolling */
             min-height: 0;
         }
 
-        /* Ensure minimum widths work on smaller screens */
         @media (max-width: 900px) {
             .favorites-section {
                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -142,7 +134,6 @@
             }
         }
 
-        /* For very wide screens, limit to 6 columns max */
         @media (min-width: 1400px) {
             .favorites-section {
                 grid-template-columns: repeat(6, 1fr);
@@ -232,22 +223,11 @@
             overflow: hidden;
         }
 
-        /* Handle mobile viewport issues for modal */
         @supports (-webkit-touch-callout: none) {
             .modal-content {
                 height: calc(-webkit-fill-available - 20px);
                 max-height: calc(-webkit-fill-available - 20px);
             }
-        }
-
-        .control-btn.delete {
-            background: #dc3545;
-            border-color: #ff1e2e;
-            color: #ffffff;
-        }
-
-        .control-btn.delete:hover {
-            background: #ff1e2e;
         }
 
         .modal-header {
@@ -298,7 +278,6 @@
             min-height: 0;
         }
 
-        /* Responsive stations grid */
         @media (max-width: 800px) {
             .stations-grid {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -398,18 +377,6 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
         }
 
-        .station-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            background: #444444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
         .station-logo-img {
             width: 90%;
             height: 90%;
@@ -429,15 +396,6 @@
             align-items: center;
             justify-content: center;
             margin-top: auto;
-        }
-
-        .sub-genre-header {
-            grid-column: 1 / -1;
-            padding: 15px;
-            text-align: center;
-            background: #222222;
-            border-radius: 8px;
-            margin-bottom: 10px;
         }
 
         .back-btn, .retry-btn {
@@ -465,39 +423,8 @@
     </style>
 </head>
 <body>
-    <!-- Test that JavaScript is working -->
-    <script>
-        console.log('JavaScript is loading...');
-    </script>
-
-    <!-- Top controls -->
     <div class="top-controls">
-        <div class="now-playing" id="nowPlaying">
-            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                <!-- WiFi signal -->
-                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                
-                <!-- Car body -->
-                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                
-                <!-- Car details -->
-                <circle cx="64" cy="160" r="16" fill="#333"/>
-                <circle cx="192" cy="160" r="16" fill="#333"/>
-                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                
-                <!-- Windshield -->
-                <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-            </svg>
-            <span>Select a station to play</span>
-        </div>
+        <div class="now-playing" id="nowPlaying">Select a station to play</div>
         <div class="control-buttons">
             <button class="control-btn play" id="playBtn">▶</button>
             <button class="control-btn pause" id="pauseBtn" style="display: none;">⏸</button>
@@ -508,7 +435,6 @@
         </div>
     </div>
 
-    <!-- Favorites section - responsive grid -->
     <div class="favorites-section">
         <div class="favorite-btn empty" data-index="0">Empty Slot</div>
         <div class="favorite-btn empty" data-index="1">Empty Slot</div>
@@ -524,7 +450,6 @@
         <div class="favorite-btn empty" data-index="11">Empty Slot</div>
     </div>
 
-    <!-- Search Modal -->
     <div class="modal" id="searchModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -553,21 +478,17 @@
     <script>
         console.log('Starting JavaScript initialization...');
         
-        // Global variables
         let currentStation = null;
         let isPlaying = false;
         let favorites = [];
-        let currentStations = []; // Current page of stations
+        let currentStations = [];
         let currentPage = 0;
-        let currentGenre = ''; // Track current genre for pagination
-        let navigationStack = []; // Track navigation for back button
-        let availableGenres = []; // Dynamic list of genres from API
-        let genreGroups = {}; // Organized genre groups
-        let retryInterval = null; // For auto-retry on connection loss
-        let isRetrying = false; // Flag to prevent multiple retry attempts
-        const stationsPerPage = 12;
+        let currentGenre = '';
+        let navigationStack = [];
+        let genreGroups = {};
+        let retryInterval = null;
+        let isRetrying = false;
         
-        // Load data from localStorage
         function loadFavorites() {
             const saved = localStorage.getItem('carRadioFavorites');
             return saved ? JSON.parse(saved) : [];
@@ -586,7 +507,350 @@
             localStorage.setItem('carRadioLastPlayed', JSON.stringify(station));
         }
         
-        // API functions
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+        }
+
+        function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    
+                    const docEl = document.documentElement;
+                    
+                    if (docEl.requestFullscreen) {
+                        docEl.requestFullscreen().catch(err => {
+                            console.log('Fullscreen request failed:', err);
+                            showFeedbackMessage('Fullscreen not supported');
+                        });
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen();
+                    } else if (docEl.webkitRequestFullScreen) {
+                        docEl.webkitRequestFullScreen();
+                    } else if (docEl.mozRequestFullScreen) {
+                        docEl.mozRequestFullScreen();
+                    } else if (docEl.msRequestFullscreen) {
+                        docEl.msRequestFullscreen();
+                    } else {
+                        showFeedbackMessage('Fullscreen not supported in this browser');
+                        return;
+                    }
+                    
+                    setTimeout(() => {
+                        window.scrollTo(0, 1);
+                    }, 100);
+                    
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(err => {
+                            console.log('Exit fullscreen failed:', err);
+                        });
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.webkitCancelFullScreen) {
+                        document.webkitCancelFullScreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            } catch (error) {
+                console.error('Fullscreen error:', error);
+                showFeedbackMessage('Fullscreen operation failed');
+            }
+        }
+
+        function updateFullscreenButton() {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (fullscreenBtn) {
+                const isFullscreen = !!(document.fullscreenElement || 
+                                       document.webkitFullscreenElement || 
+                                       document.mozFullScreenElement || 
+                                       document.msFullscreenElement);
+                
+                if (isFullscreen) {
+                    fullscreenBtn.textContent = '⛉';
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Enter Fullscreen';
+                }
+            }
+        }
+
+        function isFullscreenSupported() {
+            const docEl = document.documentElement;
+            return !!(docEl.requestFullscreen || 
+                     docEl.webkitRequestFullscreen || 
+                     docEl.webkitRequestFullScreen ||
+                     docEl.mozRequestFullScreen || 
+                     docEl.msRequestFullscreen);
+        }
+
+        function handleViewportResize() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        async function playStation(station) {
+            currentStation = station;
+            saveLastPlayed(station);
+            updatePlayingIndicators();
+            
+            try {
+                const audio = document.getElementById('audioPlayer');
+                audio.src = station.url;
+                await audio.play();
+                document.getElementById('nowPlaying').textContent = `♪ ${station.name}`;
+                
+                if (isRetrying) {
+                    isRetrying = false;
+                    if (retryInterval) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error playing station:', error);
+                handlePlaybackError();
+            }
+        }
+
+        function handlePlaybackError() {
+            if (currentStation && isPlaying && !isRetrying) {
+                isRetrying = true;
+                document.getElementById('nowPlaying').textContent = 'Connectivity lost - retrying...';
+                
+                retryInterval = setInterval(async () => {
+                    if (!isPlaying) {
+                        console.log('User paused during retry - stopping retry attempts');
+                        isRetrying = false;
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                        return;
+                    }
+                    
+                    try {
+                        console.log('Retrying to play station:', currentStation.name);
+                        const audio = document.getElementById('audioPlayer');
+                        audio.src = currentStation.url;
+                        await audio.play();
+                        
+                        isRetrying = false;
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        document.getElementById('nowPlaying').textContent = `♪ ${currentStation.name}`;
+                        console.log('Successfully reconnected and resumed playback');
+                        
+                    } catch (retryError) {
+                        console.log('Retry attempt failed, will try again...');
+                    }
+                }, 10000);
+            } else if (currentStation && !isRetrying) {
+                document.getElementById('nowPlaying').textContent = 'Error playing station';
+            }
+        }
+        
+        function togglePlay() {
+            const audio = document.getElementById('audioPlayer');
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                if (currentStation) {
+                    audio.play().catch(() => {
+                        handlePlaybackError();
+                    });
+                } else {
+                    const lastPlayed = loadLastPlayed();
+                    if (lastPlayed) {
+                        playStation(lastPlayed);
+                    }
+                }
+            }
+        }
+        
+        function updatePlayingIndicators() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.classList.remove('playing');
+            });
+
+            if (currentStation) {
+                const playingIndex = favorites.findIndex(fav => 
+                    fav && fav.url === currentStation.url
+                );
+                if (playingIndex !== -1) {
+                    document.querySelector(`[data-index="${playingIndex}"]`).classList.add('playing');
+                }
+            }
+            
+            const stationsGrid = document.getElementById('stationsGrid');
+            if (stationsGrid && currentStations.length > 0) {
+                const stationButtons = stationsGrid.querySelectorAll('.station-btn');
+                if (stationButtons.length > 0) {
+                    stationButtons.forEach(btn => {
+                        btn.classList.remove('playing');
+                    });
+                    
+                    if (currentStation) {
+                        const matchingIndex = currentStations.findIndex(station => 
+                            station && station.url === currentStation.url
+                        );
+                        if (matchingIndex !== -1 && stationButtons[matchingIndex]) {
+                            stationButtons[matchingIndex].classList.add('playing');
+                        }
+                    }
+                }
+            }
+        }
+        
+        function deleteCurrentFavorite() {
+            if (!currentStation) {
+                console.log('No current station to delete');
+                return;
+            }
+
+            const favoriteIndex = favorites.findIndex(fav => 
+                fav && fav.url === currentStation.url
+            );
+            
+            if (favoriteIndex !== -1) {
+                console.log(`Deleting favorite: ${favorites[favoriteIndex].name}`);
+                favorites[favoriteIndex] = null;
+                saveFavorites();
+                loadFavoritesUI();
+                updatePlayingIndicators();
+            } else {
+                console.log('Current station is not in favorites');
+            }
+        }
+
+        function updateBackButton() {
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (navigationStack.length > 0) {
+                const current = navigationStack[navigationStack.length - 1];
+                modalTitle.textContent = current.title;
+            } else {
+                modalTitle.textContent = 'Select Genre';
+            }
+        }
+
+        function goBack() {
+            if (navigationStack.length > 0) {
+                const previous = navigationStack.pop();
+                updateBackButton();
+                
+                if (previous.action === 'showTopLevelGenres') {
+                    showTopLevelGenres();
+                } else if (previous.action === 'showSubGenres') {
+                    showSubGenres(previous.genre);
+                }
+            }
+        }
+
+        function addCurrentToFavorites() {
+            if (!currentStation) {
+                console.log('No current station to add');
+                return;
+            }
+
+            const existingIndex = favorites.findIndex(fav => 
+                fav && fav.url === currentStation.url
+            );
+            
+            if (existingIndex !== -1) {
+                console.log('Station already in favorites');
+                showFeedbackMessage('Station already in favorites');
+                return;
+            }
+
+            let targetIndex = 0;
+            let oldestTime = Date.now();
+
+            for (let i = 0; i < 12; i++) {
+                if (!favorites[i]) {
+                    targetIndex = i;
+                    break;
+                }
+                if (favorites[i].timestamp < oldestTime) {
+                    oldestTime = favorites[i].timestamp;
+                    targetIndex = i;
+                }
+            }
+
+            currentStation.timestamp = Date.now();
+            favorites[targetIndex] = currentStation;
+            saveFavorites();
+            loadFavoritesUI();
+            updatePlayingIndicators();
+            console.log(`Added station "${currentStation.name}" to favorites at slot ${targetIndex}`);
+            
+            showFeedbackMessage(`${currentStation.name} added to Favourites`);
+        }
+
+        function showFeedbackMessage(message) {
+            let feedbackEl = document.getElementById('feedbackMessage');
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = 'feedbackMessage';
+                feedbackEl.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    z-index: 1001;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                `;
+                document.body.appendChild(feedbackEl);
+            }
+            
+            feedbackEl.textContent = message;
+            feedbackEl.style.opacity = '1';
+            
+            setTimeout(() => {
+                feedbackEl.style.opacity = '0';
+            }, 2000);
+        }
+        
+        function loadFavoritesUI() {
+            const favoriteButtons = document.querySelectorAll('.favorite-btn');
+            favoriteButtons.forEach((btn, index) => {
+                if (favorites[index]) {
+                    const station = favorites[index];
+                    
+                    if (station.logo && station.logo.startsWith('http')) {
+                        btn.innerHTML = `
+                            <img src="${station.logo}" class="favorite-logo-img" onerror="this.style.display='none'">
+                            <div class="favorite-name">${truncateText(station.name, 30)}</div>
+                        `;
+                    } else {
+                        btn.innerHTML = `<div class="favorite-name">${truncateText(station.name, 30)}</div>`;
+                    }
+                    
+                    btn.classList.remove('empty');
+                } else {
+                    btn.innerHTML = 'Empty Slot';
+                    btn.classList.add('empty');
+                }
+                btn.classList.remove('playing');
+            });
+        }
+        
+        function playFavorite(index) {
+            if (favorites[index]) {
+                playStation(favorites[index]);
+            }
+        }
+
         async function fetchAvailableGenres() {
             const apiUrl = 'https://de1.api.radio-browser.info/json/tags?limit=1000&order=stationcount&reverse=true';
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
@@ -608,28 +872,25 @@
                 const tags = JSON.parse(data.contents);
                 console.log(`Successfully fetched ${tags.length} tags from API`);
                 
-                // Filter and organize genres
                 const organizedGenres = organizeGenres(tags);
                 return organizedGenres;
                 
             } catch (error) {
                 console.error('Error fetching genres:', error);
-                throw error; // Re-throw the error instead of falling back
+                throw error;
             }
         }
 
         function organizeGenres(tags) {
-            // Filter tags with reasonable station counts and clean names
             const filteredTags = tags
                 .filter(tag => 
-                    tag.stationcount >= 10 && // At least 10 stations
-                    tag.name.length <= 20 && // Reasonable name length
-                    !tag.name.includes('http') && // No URLs
-                    /^[a-zA-Z0-9\s\-&]+$/.test(tag.name) // Only alphanumeric, spaces, hyphens, ampersands
+                    tag.stationcount >= 10 && 
+                    tag.name.length <= 20 && 
+                    !tag.name.includes('http') && 
+                    /^[a-zA-Z0-9\s\-&]+$/.test(tag.name)
                 )
-                .slice(0, 100); // Take top 100 by station count
+                .slice(0, 100);
 
-            // Group genres by category
             const groups = {
                 electronic: [],
                 rock: [],
@@ -665,520 +926,15 @@
                 }
             });
 
-            // Sort each group by station count and limit to reasonable numbers
             Object.keys(groups).forEach(key => {
                 groups[key] = groups[key]
                     .sort((a, b) => b.count - a.count)
-                    .slice(0, 15); // Max 15 per category
+                    .slice(0, 15);
             });
 
             return groups;
         }
-        // Fullscreen functionality with better cross-browser support
-        function toggleFullscreen() {
-            try {
-                if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-                    !document.mozFullScreenElement && !document.msFullscreenElement) {
-                    
-                    // Enter fullscreen - try different methods
-                    const docEl = document.documentElement;
-                    
-                    if (docEl.requestFullscreen) {
-                        docEl.requestFullscreen().catch(err => {
-                            console.log('Fullscreen request failed:', err);
-                            showFeedbackMessage('Fullscreen not supported');
-                        });
-                    } else if (docEl.webkitRequestFullscreen) {
-                        // Safari/Chrome
-                        docEl.webkitRequestFullscreen();
-                    } else if (docEl.webkitRequestFullScreen) {
-                        // Older Safari
-                        docEl.webkitRequestFullScreen();
-                    } else if (docEl.mozRequestFullScreen) {
-                        // Firefox
-                        docEl.mozRequestFullScreen();
-                    } else if (docEl.msRequestFullscreen) {
-                        // IE/Edge
-                        docEl.msRequestFullscreen();
-                    } else {
-                        // Fallback for unsupported browsers
-                        console.log('Fullscreen API not supported');
-                        showFeedbackMessage('Fullscreen not supported in this browser');
-                        return;
-                    }
-                    
-                    // Hide address bar on mobile as fallback
-                    setTimeout(() => {
-                        window.scrollTo(0, 1);
-                    }, 100);
-                    
-                } else {
-                    // Exit fullscreen
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(err => {
-                            console.log('Exit fullscreen failed:', err);
-                        });
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.webkitCancelFullScreen) {
-                        document.webkitCancelFullScreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
-                }
-            } catch (error) {
-                console.error('Fullscreen error:', error);
-                showFeedbackMessage('Fullscreen operation failed');
-            }
-        }
-
-        // Update fullscreen button text based on state - with better browser detection
-        function updateFullscreenButton() {
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            if (fullscreenBtn) {
-                const isFullscreen = !!(document.fullscreenElement || 
-                                       document.webkitFullscreenElement || 
-                                       document.mozFullScreenElement || 
-                                       document.msFullscreenElement);
-                
-                if (isFullscreen) {
-                    fullscreenBtn.textContent = '⛉'; // Exit fullscreen icon
-                    fullscreenBtn.title = 'Exit Fullscreen';
-                } else {
-                    fullscreenBtn.textContent = '⛶'; // Enter fullscreen icon
-                    fullscreenBtn.title = 'Enter Fullscreen';
-                }
-            }
-        }
-
-        // Check if fullscreen is supported
-        function isFullscreenSupported() {
-            const docEl = document.documentElement;
-            return !!(docEl.requestFullscreen || 
-                     docEl.webkitRequestFullscreen || 
-                     docEl.webkitRequestFullScreen ||
-                     docEl.mozRequestFullScreen || 
-                     docEl.msRequestFullscreen);
-        }
-
-        // Handle viewport height changes (especially on mobile)
-        function handleViewportResize() {
-            // Update CSS custom property for actual viewport height
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        }
         
-        function truncateText(text, maxLength) {
-            return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
-        }
-        async function playStation(station) {
-            currentStation = station;
-            saveLastPlayed(station);
-            updatePlayingIndicators();
-            
-            try {
-                const audio = document.getElementById('audioPlayer');
-                audio.src = station.url;
-                await audio.play();
-                document.getElementById('nowPlaying').innerHTML = `
-                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <!-- WiFi signal -->
-                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                        
-                        <!-- Car body -->
-                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                        
-                        <!-- Car details -->
-                        <circle cx="64" cy="160" r="16" fill="#333"/>
-                        <circle cx="192" cy="160" r="16" fill="#333"/>
-                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        
-                        <!-- Windshield -->
-                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                    </svg>
-                    <span>♪ ${station.name}</span>
-                `;
-                
-                // Clear retry state if successful
-                if (isRetrying) {
-                    isRetrying = false;
-                    if (retryInterval) {
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                    }
-                }
-            } catch (error) {
-                console.error('Error playing station:', error);
-                handlePlaybackError();
-            }
-        }
-
-        function handlePlaybackError() {
-            // Only show retry message if we were actually playing a station AND user intended to play
-            if (currentStation && isPlaying && !isRetrying) {
-                isRetrying = true;
-                document.getElementById('nowPlaying').innerHTML = `
-                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <!-- WiFi signal -->
-                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                        
-                        <!-- Car body -->
-                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                        
-                        <!-- Car details -->
-                        <circle cx="64" cy="160" r="16" fill="#333"/>
-                        <circle cx="192" cy="160" r="16" fill="#333"/>
-                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        
-                        <!-- Windshield -->
-                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                    </svg>
-                    <span>Connectivity lost - retrying...</span>
-                `;
-                
-                // Start retry attempts every 10 seconds (increased from 5)
-                retryInterval = setInterval(async () => {
-                    // Check if user has paused since the error occurred
-                    if (!isPlaying) {
-                        console.log('User paused during retry - stopping retry attempts');
-                        isRetrying = false;
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                        document.getElementById('nowPlaying').innerHTML = `
-                            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                                <!-- WiFi signal -->
-                                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                                <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                                
-                                <!-- Car body -->
-                                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                                
-                                <!-- Car details -->
-                                <circle cx="64" cy="160" r="16" fill="#333"/>
-                                <circle cx="192" cy="160" r="16" fill="#333"/>
-                                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                
-                                <!-- Windshield -->
-                                <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                            </svg>
-                            <span>⏸ ${currentStation.name}</span>
-                        `;
-                        return;
-                    }
-                    
-                    try {
-                        console.log('Retrying to play station:', currentStation.name);
-                        const audio = document.getElementById('audioPlayer');
-                        audio.src = currentStation.url;
-                        await audio.play();
-                        
-                        // Success - clear retry state
-                        isRetrying = false;
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                        document.getElementById('nowPlaying').innerHTML = `
-                            <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                                <!-- WiFi signal -->
-                                <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                                <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                                <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                                
-                                <!-- Car body -->
-                                <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                                <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                                
-                                <!-- Car details -->
-                                <circle cx="64" cy="160" r="16" fill="#333"/>
-                                <circle cx="192" cy="160" r="16" fill="#333"/>
-                                <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                                <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                                
-                                <!-- Windshield -->
-                                <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                                <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                            </svg>
-                            <span>♪ ${currentStation.name}</span>
-                        `;
-                        console.log('Successfully reconnected and resumed playback');
-                        
-                    } catch (retryError) {
-                        console.log('Retry attempt failed, will try again...');
-                        // Continue retrying
-                    }
-                }, 10000);
-            } else if (currentStation && !isRetrying) {
-                // Station selected but not playing - just show error without retry
-                document.getElementById('nowPlaying').innerHTML = `
-                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <!-- WiFi signal -->
-                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                        
-                        <!-- Car body -->
-                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                        
-                        <!-- Car details -->
-                        <circle cx="64" cy="160" r="16" fill="#333"/>
-                        <circle cx="192" cy="160" r="16" fill="#333"/>
-                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        
-                        <!-- Windshield -->
-                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                    </svg>
-                    <span>Error playing station</span>
-                `;
-            }
-        }
-        
-        function togglePlay() {
-            const audio = document.getElementById('audioPlayer');
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                if (currentStation) {
-                    audio.play().catch(() => {
-                        handlePlaybackError();
-                    });
-                } else {
-                    const lastPlayed = loadLastPlayed();
-                    if (lastPlayed) {
-                        playStation(lastPlayed);
-                    }
-                }
-            }
-        }
-        
-        function updatePlayingIndicators() {
-            // Update main screen favorites
-            document.querySelectorAll('.favorite-btn').forEach(btn => {
-                btn.classList.remove('playing');
-            });
-
-            if (currentStation) {
-                const playingIndex = favorites.findIndex(fav => 
-                    fav && fav.url === currentStation.url
-                );
-                if (playingIndex !== -1) {
-                    document.querySelector(`[data-index="${playingIndex}"]`).classList.add('playing');
-                }
-            }
-            
-            // Update dialog 3 station grid if it's currently displayed
-            const stationsGrid = document.getElementById('stationsGrid');
-            if (stationsGrid && currentStations.length > 0) {
-                // Check if we're currently showing stations (not genres)
-                const stationButtons = stationsGrid.querySelectorAll('.station-btn');
-                if (stationButtons.length > 0) {
-                    stationButtons.forEach(btn => {
-                        btn.classList.remove('playing');
-                    });
-                    
-                    if (currentStation) {
-                        // Find the matching station in the current page
-                        const matchingIndex = currentStations.findIndex(station => 
-                            station && station.url === currentStation.url
-                        );
-                        if (matchingIndex !== -1 && stationButtons[matchingIndex]) {
-                            stationButtons[matchingIndex].classList.add('playing');
-                        }
-                    }
-                }
-            }
-        }
-        
-        function deleteCurrentFavorite() {
-            if (!currentStation) {
-                console.log('No current station to delete');
-                return;
-            }
-
-            // Find the favorite that matches current station
-            const favoriteIndex = favorites.findIndex(fav => 
-                fav && fav.url === currentStation.url
-            );
-            
-            if (favoriteIndex !== -1) {
-                console.log(`Deleting favorite: ${favorites[favoriteIndex].name}`);
-                favorites[favoriteIndex] = null; // Remove from favorites
-                saveFavorites();
-                loadFavoritesUI();
-                updatePlayingIndicators();
-                // Keep station playing - user can re-add if deleted by mistake
-            } else {
-                console.log('Current station is not in favorites');
-            }
-        }
-
-        function updateBackButton() {
-            const modalTitle = document.getElementById('modalTitle');
-            
-            if (navigationStack.length > 0) {
-                // Update title based on current screen
-                const current = navigationStack[navigationStack.length - 1];
-                modalTitle.textContent = current.title;
-            } else {
-                modalTitle.textContent = 'Select Genre';
-            }
-        }
-
-        function goBack() {
-            if (navigationStack.length > 0) {
-                const previous = navigationStack.pop();
-                updateBackButton();
-                
-                // Execute the back action
-                if (previous.action === 'showTopLevelGenres') {
-                    showTopLevelGenres();
-                } else if (previous.action === 'showSubGenres') {
-                    showSubGenres(previous.genre);
-                }
-            }
-        }
-
-        function addCurrentToFavorites() {
-            if (!currentStation) {
-                console.log('No current station to add');
-                return;
-            }
-
-            // Check if station already exists in favorites
-            const existingIndex = favorites.findIndex(fav => 
-                fav && fav.url === currentStation.url
-            );
-            
-            if (existingIndex !== -1) {
-                console.log('Station already in favorites');
-                showFeedbackMessage('Station already in favorites');
-                return; // Station already exists, don't add duplicate
-            }
-
-            let targetIndex = 0;
-            let oldestTime = Date.now();
-
-            for (let i = 0; i < 12; i++) {
-                if (!favorites[i]) {
-                    targetIndex = i;
-                    break;
-                }
-                if (favorites[i].timestamp < oldestTime) {
-                    oldestTime = favorites[i].timestamp;
-                    targetIndex = i;
-                }
-            }
-
-            currentStation.timestamp = Date.now();
-            favorites[targetIndex] = currentStation;
-            saveFavorites();
-            loadFavoritesUI();
-            updatePlayingIndicators();
-            console.log(`Added station "${currentStation.name}" to favorites at slot ${targetIndex}`);
-            
-            // Show feedback message
-            showFeedbackMessage(`${currentStation.name} added to Favourites`);
-        }
-
-        function showFeedbackMessage(message) {
-            // Create or update feedback message element
-            let feedbackEl = document.getElementById('feedbackMessage');
-            if (!feedbackEl) {
-                feedbackEl = document.createElement('div');
-                feedbackEl.id = 'feedbackMessage';
-                feedbackEl.style.cssText = `
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: #28a745;
-                    color: white;
-                    padding: 10px 20px;
-                    border-radius: 8px;
-                    font-weight: bold;
-                    z-index: 1001;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                `;
-                document.body.appendChild(feedbackEl);
-            }
-            
-            feedbackEl.textContent = message;
-            feedbackEl.style.opacity = '1';
-            
-            // Hide after 2 seconds
-            setTimeout(() => {
-                feedbackEl.style.opacity = '0';
-            }, 2000);
-        }
-        
-        function loadFavoritesUI() {
-            const favoriteButtons = document.querySelectorAll('.favorite-btn');
-            favoriteButtons.forEach((btn, index) => {
-                if (favorites[index]) {
-                    const station = favorites[index];
-                    
-                    // Check if station has a valid image URL
-                    if (station.logo && station.logo.startsWith('http')) {
-                        // Show image only
-                        btn.innerHTML = `
-                            <img src="${station.logo}" class="favorite-logo-img" onerror="this.style.display='none'">
-                            <div class="favorite-name">${truncateText(station.name, 30)}</div>
-                        `;
-                    } else {
-                        // No image - show name only
-                        btn.innerHTML = `<div class="favorite-name">${truncateText(station.name, 30)}</div>`;
-                    }
-                    
-                    btn.classList.remove('empty');
-                } else {
-                    btn.innerHTML = 'Empty Slot';
-                    btn.classList.add('empty');
-                }
-                btn.classList.remove('playing');
-            });
-        }
-        
-        function playFavorite(index) {
-            if (favorites[index]) {
-                playStation(favorites[index]);
-            }
-        }
-        
-        async function playStation(station) {
         async function fetchStationsPage(genre, page = 0) {
             const offset = page * 12;
             const apiUrl = `https://de1.api.radio-browser.info/json/stations/bytag/${encodeURIComponent(genre)}?hidebroken=true&limit=12&offset=${offset}&order=votes&reverse=true`;
@@ -1206,18 +962,16 @@
                         station.url_resolved && 
                         station.name && 
                         station.lastcheckok === 1 &&
-                        station.lastchecktime_iso8601 && // Has been checked recently
-                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Checked within last 7 days
+                        station.lastchecktime_iso8601 && 
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                     )
                     .sort((a, b) => {
-                        // Prioritize stations with logos
                         const aHasLogo = a.favicon && a.favicon.startsWith('http');
                         const bHasLogo = b.favicon && b.favicon.startsWith('http');
                         
                         if (aHasLogo && !bHasLogo) return -1;
                         if (!aHasLogo && bHasLogo) return 1;
                         
-                        // Then sort by votes
                         return (b.votes || 0) - (a.votes || 0);
                     })
                     .map(station => ({
@@ -1239,7 +993,6 @@
             }
         }
 
-        // New function for text search
         async function searchStationsByName(query) {
             const apiUrl = `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(query)}?hidebroken=true&limit=50&order=votes&reverse=true`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
@@ -1266,21 +1019,19 @@
                         station.url_resolved && 
                         station.name && 
                         station.lastcheckok === 1 &&
-                        station.lastchecktime_iso8601 && // Has been checked recently
-                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Checked within last 7 days
+                        station.lastchecktime_iso8601 && 
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                     )
                     .sort((a, b) => {
-                        // Prioritize stations with logos
                         const aHasLogo = a.favicon && a.favicon.startsWith('http');
                         const bHasLogo = b.favicon && b.favicon.startsWith('http');
                         
                         if (aHasLogo && !bHasLogo) return -1;
                         if (!aHasLogo && bHasLogo) return 1;
                         
-                        // Then sort by votes
                         return (b.votes || 0) - (a.votes || 0);
                     })
-                    .slice(0, 12) // Limit to 12 results for grid
+                    .slice(0, 12)
                     .map(station => ({
                         name: station.name,
                         url: station.url_resolved,
@@ -1300,7 +1051,6 @@
             }
         }
         
-        // Station fetching - modified to fetch by page
         function displayCurrentPage() {
             if (currentStations.length === 0) {
                 document.getElementById('stationsGrid').innerHTML = '<div class="loading">No stations found for this genre</div>';
@@ -1309,30 +1059,22 @@
                 return;
             }
 
-            // Show pagination controls
             document.getElementById('paginationControls').style.display = 'flex';
             document.getElementById('pageInfo').textContent = `Page ${currentPage + 1}`;
             
-            // Update modal now playing indicator
             updateModalNowPlaying();
             
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             
-            // Prev button disabled if on first page
             prevBtn.classList.toggle('disabled', currentPage === 0);
-            
-            // Next button disabled if we got less than 12 stations (indicating last page)
             nextBtn.classList.toggle('disabled', currentStations.length < 12);
 
-            // Render stations - let CSS Grid handle the responsive layout
             const stationsGrid = document.getElementById('stationsGrid');
             stationsGrid.innerHTML = '';
             
-            // Create all station buttons and let CSS Grid auto-place them
             currentStations.forEach((station, index) => {
                 const stationDiv = document.createElement('div');
-                // Check if station has logo
                 const logoElement = station.logo ? 
                     `<img src="${station.logo}" class="station-logo-img" onerror="this.style.display='none'">` :
                     `<div style="font-size: 16px; color: #666;">📻</div>`;
@@ -1376,7 +1118,6 @@
         }
 
         async function nextPage() {
-            // Only allow next if current page has 12 stations (indicating more might be available)
             if (currentStations.length === 12) {
                 currentPage++;
                 console.log(`Loading next page: ${currentPage + 1}`);
@@ -1403,11 +1144,9 @@
             }
         }
         
-        // Pagination functions - modified for responsive grid
         function selectGenre(genre) {
             console.log('Genre selected:', genre);
             
-            // Check if this is a main category with sub-genres
             if (genreGroups[genre] && genreGroups[genre].length > 1) {
                 navigationStack.push({ 
                     action: 'showTopLevelGenres', 
@@ -1416,7 +1155,6 @@
                 updateBackButton();
                 showSubGenres(genre);
             } else {
-                // This is a specific genre, load stations directly
                 loadStations(genre);
             }
         }
@@ -1429,7 +1167,6 @@
             const stationsGrid = document.getElementById('stationsGrid');
             stationsGrid.innerHTML = '';
 
-            // Create genre buttons and let CSS Grid auto-place them
             subGenreList.forEach((subGenre, index) => {
                 const genreDiv = document.createElement('div');
                 genreDiv.className = 'genre-btn';
@@ -1439,7 +1176,6 @@
             });
         }
 
-        // New function to handle sub-genre selection with proper indexing
         function selectSubGenre(topGenre, index) {
             const subGenreList = genreGroups[topGenre] || [];
             if (index < subGenreList.length) {
@@ -1452,7 +1188,6 @@
         function showTopLevelGenres() {
             document.getElementById('paginationControls').style.display = 'none';
             
-            // Show loading while we fetch genres if not already loaded
             if (Object.keys(genreGroups).length === 0) {
                 document.getElementById('stationsGrid').innerHTML = '<div class="loading">Loading genres...</div>';
                 loadGenres().then(() => {
@@ -1473,7 +1208,6 @@
         }
 
         function displayTopLevelGenres() {
-            // Show the search input first
             const searchHtml = `
                 <div class="search-container" style="grid-column: 1 / -1; padding: 15px; background: #222; border-radius: 8px; margin-bottom: 10px;">
                     <input type="text" id="stationSearchInput" placeholder="Search for station name..." 
@@ -1482,7 +1216,6 @@
                 </div>
             `;
 
-            // Get the main genre categories that have content
             const mainGenres = Object.keys(genreGroups).filter(key => genreGroups[key].length > 0);
             
             hideModalNowPlaying();
@@ -1490,7 +1223,6 @@
             const stationsGrid = document.getElementById('stationsGrid');
             stationsGrid.innerHTML = searchHtml;
             
-            // Add genre buttons - let CSS Grid auto-place them
             mainGenres.forEach(genre => {
                 const genreDiv = document.createElement('div');
                 genreDiv.className = 'genre-btn';
@@ -1499,7 +1231,6 @@
                 stationsGrid.appendChild(genreDiv);
             });
             
-            // Set up search functionality
             const searchInput = document.getElementById('stationSearchInput');
             const searchBtn = document.getElementById('searchStationBtn');
             
@@ -1519,7 +1250,6 @@
                         currentGenre = `search:${query}`;
                         currentPage = 0;
                         
-                        // Push search to navigation stack
                         navigationStack.push({ 
                             action: 'showTopLevelGenres', 
                             title: 'Select Genre'
@@ -1546,7 +1276,6 @@
                 });
             }
             
-            // Clear navigation stack since we're at the top level
             navigationStack = [];
             updateBackButton();
         }
@@ -1558,7 +1287,7 @@
                     console.log('Loaded genre groups:', genreGroups);
                 } catch (error) {
                     console.error('Failed to load genres:', error);
-                    throw error; // Re-throw to be handled by caller
+                    throw error;
                 }
             }
         }
@@ -1571,13 +1300,12 @@
             });
             updateBackButton();
             
-            currentGenre = genre; // Store current genre for pagination
-            currentPage = 0; // Reset to first page
+            currentGenre = genre;
+            currentPage = 0;
             await loadStationsPage();
         }
 
         function getCurrentTopGenre(subGenre) {
-            // Find which top-level genre this sub-genre belongs to
             for (const [topGenre, subGenres] of Object.entries(genreGroups)) {
                 if (subGenres.some(sg => sg.id === subGenre)) {
                     return topGenre;
@@ -1589,21 +1317,17 @@
         function playStationFromGrid(index) {
             if (currentStations[index]) {
                 playStation(currentStations[index]);
-                // Refresh the display to update highlighting
                 displayCurrentPage();
                 console.log('Playing station, staying on selection screen');
             }
         }
         
-        // Global functions for onclick handlers
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, setting up radio app...');
             
-            // Load favorites
             favorites = loadFavorites();
             loadFavoritesUI();
             
-            // Get elements
             const searchBtn = document.getElementById('searchBtn');
             const searchModal = document.getElementById('searchModal');
             const closeModal = document.getElementById('closeModal');
@@ -1617,7 +1341,6 @@
             const modalAddBtn = document.getElementById('modalAddBtn');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
             
-            // Set up audio events with increased buffering tolerance
             audio.addEventListener('play', function() {
                 isPlaying = true;
                 playBtn.style.display = 'none';
@@ -1629,7 +1352,6 @@
                 playBtn.style.display = 'block';
                 pauseBtn.style.display = 'none';
                 
-                // Clear any retry attempts when user explicitly pauses
                 if (isRetrying) {
                     isRetrying = false;
                     if (retryInterval) {
@@ -1639,42 +1361,14 @@
                     console.log('User paused - stopping retry attempts');
                 }
                 
-                // Update display to show paused state
                 if (currentStation) {
-                    document.getElementById('nowPlaying').innerHTML = `
-                        <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                            <!-- WiFi signal -->
-                            <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                            <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                            <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                            
-                            <!-- Car body -->
-                            <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                            <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                            
-                            <!-- Car details -->
-                            <circle cx="64" cy="160" r="16" fill="#333"/>
-                            <circle cx="192" cy="160" r="16" fill="#333"/>
-                            <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                            <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                            <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                            <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                            <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                            
-                            <!-- Windshield -->
-                            <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                            <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                        </svg>
-                        <span>⏸ ${currentStation.name}</span>
-                    `;
+                    document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
                 }
             });
             
-            // Only handle error events if they occur during active playback attempts
             let lastErrorTime = 0;
             audio.addEventListener('error', function(e) {
                 const now = Date.now();
-                // Debounce error events - only handle if more than 15 seconds since last error
                 if (now - lastErrorTime < 15000) {
                     console.log('Error event debounced');
                     return;
@@ -1682,7 +1376,6 @@
                 lastErrorTime = now;
                 
                 console.log('Audio error detected:', e);
-                // Only handle as error if we were actually trying to play
                 if (isPlaying && currentStation) {
                     handlePlaybackError();
                 }
@@ -1691,36 +1384,29 @@
                 pauseBtn.style.display = 'none';
             });
 
-            // Be more lenient with stalled events
             let stallCount = 0;
             audio.addEventListener('stalled', function() {
                 stallCount++;
                 console.log(`Audio stalled (count: ${stallCount})`);
-                // Only treat as error after multiple stalls within a short time AND we're supposed to be playing
                 if (stallCount >= 3 && isPlaying && currentStation) {
                     console.log('Multiple stalls detected - treating as connectivity issue');
                     handlePlaybackError();
-                    stallCount = 0; // Reset counter
+                    stallCount = 0;
                 }
             });
 
-            // Reset stall counter on successful data loading
             audio.addEventListener('loadstart', function() {
                 stallCount = 0;
             });
 
             audio.addEventListener('suspend', function() {
                 console.log('Audio suspended (often due to autoplay restrictions)');
-                // Don't treat suspend as an error unless we're actively trying to play
-                // Suspend often happens due to autoplay policies, not connectivity issues
             });
             
-            // Set up button events
             if (searchBtn) {
                 searchBtn.addEventListener('click', function() {
                     console.log('Search button clicked!');
                     searchModal.style.display = 'block';
-                    // Load genres first, then show top level
                     loadGenres().then(() => {
                         showTopLevelGenres();
                     });
@@ -1732,9 +1418,7 @@
                     if (navigationStack.length > 0) {
                         goBack();
                     } else {
-                        // First dialog - close the modal completely
                         searchModal.style.display = 'none';
-                        // Reset navigation stack and clear any loaded content
                         navigationStack = [];
                         updateBackButton();
                     }
@@ -1788,69 +1472,36 @@
                 });
             }
             
-            // Set up favorite buttons
             document.querySelectorAll('.favorite-btn').forEach((btn, index) => {
                 btn.addEventListener('click', function() {
                     playFavorite(index);
                 });
             });
             
-            // Set up fullscreen event listeners with all browser prefixes
             document.addEventListener('fullscreenchange', updateFullscreenButton);
             document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
             document.addEventListener('mozfullscreenchange', updateFullscreenButton);
             document.addEventListener('msfullscreenchange', updateFullscreenButton);
             
-            // Hide fullscreen button if not supported
             if (fullscreenBtn && !isFullscreenSupported()) {
                 fullscreenBtn.style.display = 'none';
                 console.log('Fullscreen API not supported, hiding button');
             }
             
-            // Handle viewport changes (especially important for mobile)
             window.addEventListener('resize', handleViewportResize);
             window.addEventListener('orientationchange', () => {
                 setTimeout(handleViewportResize, 100);
             });
             
-            // Initialize viewport handling
             handleViewportResize();
             
-            // Auto-resume last played station on startup
             const lastPlayed = loadLastPlayed();
             if (lastPlayed) {
                 console.log('Auto-resuming last played station:', lastPlayed.name);
-                // Set current station and update indicators immediately
                 currentStation = lastPlayed;
                 updatePlayingIndicators();
-                document.getElementById('nowPlaying').innerHTML = `
-                    <svg class="car-radio-icon" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                        <!-- WiFi signal -->
-                        <path d="M208 88a79.74 79.74 0 0 0-80-80 79.74 79.74 0 0 0-80 80" stroke="currentColor" stroke-width="16" fill="none" stroke-linecap="round"/>
-                        <path d="M182 64a47.85 47.85 0 0 0-54-54 47.85 47.85 0 0 0-54 54" stroke="currentColor" stroke-width="14" fill="none" stroke-linecap="round"/>
-                        <circle cx="128" cy="72" r="8" fill="currentColor"/>
-                        
-                        <!-- Car body -->
-                        <path d="M224 120H32l16-32h128z" fill="currentColor"/>
-                        <rect x="24" y="120" width="208" height="80" rx="12" fill="currentColor"/>
-                        
-                        <!-- Car details -->
-                        <circle cx="64" cy="160" r="16" fill="#333"/>
-                        <circle cx="192" cy="160" r="16" fill="#333"/>
-                        <rect x="96" y="152" width="64" height="8" rx="4" fill="#666"/>
-                        <rect x="96" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="116" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="136" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        <rect x="156" y="168" width="12" height="4" rx="2" fill="#666"/>
-                        
-                        <!-- Windshield -->
-                        <path d="M48 120h160l-16-24H64z" fill="#444"/>
-                        <path d="M80 96h96a16 16 0 0 1 16 16v8H64v-8a16 16 0 0 1 16-16z" fill="#666"/>
-                    </svg>
-                    <span>♪ ${lastPlayed.name}</span>
-                `;
+                document.getElementById('nowPlaying').textContent = `♪ ${lastPlayed.name}`;
                 
-                // Function to attempt auto-resume
                 const attemptAutoResume = () => {
                     const audio = document.getElementById('audioPlayer');
                     if (!audio) {
@@ -1862,26 +1513,20 @@
                     console.log('Audio element ready, attempting to play...');
                     audio.src = lastPlayed.url;
                     
-                    // Wait for the src to be set, then try to play
                     setTimeout(() => {
                         audio.play().then(() => {
                             console.log('Auto-resume successful');
                         }).catch(error => {
                             console.log('Auto-resume blocked by browser (this is normal):', error.message);
-                            // Many browsers block autoplay without user interaction
-                            // The station is still selected and ready to play when user clicks play
                         });
                     }, 100);
                 };
                 
-                // Start the auto-resume attempt
                 attemptAutoResume();
             }
             
             console.log('Radio app setup complete');
         });
-        
-        console.log('JavaScript file loaded completely');
         
         console.log('JavaScript file loaded completely');
     </script>
