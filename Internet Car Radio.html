@@ -432,6 +432,7 @@
             <button class="control-btn delete" id="deleteBtn">✕</button>
             <button class="control-btn" id="searchBtn">Search</button>
             <button class="control-btn" id="fullscreenBtn">⛶</button>
+            <button class="control-btn" id="testBtn" style="font-size: 12px;">Test</button>
         </div>
     </div>
 
@@ -653,9 +654,12 @@
         }
 
         function showFullscreenReminder() {
+            console.log('showFullscreenReminder() called');
+            
             // Create a temporary notification and full-screen tap area
             let reminderEl = document.getElementById('fullscreenReminder');
             if (!reminderEl) {
+                console.log('Creating new fullscreen reminder element');
                 reminderEl = document.createElement('div');
                 reminderEl.id = 'fullscreenReminder';
                 reminderEl.style.cssText = `
@@ -679,11 +683,15 @@
                 reminderEl.innerHTML = 'Touch anywhere to resume fullscreen ⛶';
                 
                 document.body.appendChild(reminderEl);
+                console.log('Reminder element added to document');
+            } else {
+                console.log('Using existing reminder element');
             }
             
             // Create invisible full-screen tap area
             let tapArea = document.getElementById('fullscreenTapArea');
             if (!tapArea) {
+                console.log('Creating tap area');
                 tapArea = document.createElement('div');
                 tapArea.id = 'fullscreenTapArea';
                 tapArea.style.cssText = `
@@ -702,12 +710,15 @@
                 tapArea.addEventListener('touchend', restoreFullscreenFromTap);
                 
                 document.body.appendChild(tapArea);
+                console.log('Tap area added to document');
             }
             
             reminderEl.style.opacity = '1';
+            console.log('Reminder should now be visible');
             
-            // Auto-hide after 5 seconds (back to your preferred time)
+            // Auto-hide after 5 seconds
             setTimeout(() => {
+                console.log('Auto-hiding reminder after 5 seconds');
                 hideFullscreenReminder();
             }, 5000);
         }
@@ -715,9 +726,10 @@
         function restoreFullscreenFromTap(e) {
             e.preventDefault();
             e.stopPropagation();
+            console.log('User tapped to restore fullscreen');
             toggleFullscreen().catch(err => {
-                // Silently handle fullscreen denial - no user feedback needed
-                console.log('Fullscreen tap ignored due to browser restrictions');
+                console.log('Fullscreen request failed even from user tap:', err);
+                showFeedbackMessage('Fullscreen blocked by browser');
             });
             hideFullscreenReminder();
         }
@@ -1492,6 +1504,7 @@
             const nextBtn = document.getElementById('nextBtn');
             const modalAddBtn = document.getElementById('modalAddBtn');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const testBtn = document.getElementById('testBtn');
             
             audio.addEventListener('play', function() {
                 isPlaying = true;
@@ -1627,6 +1640,13 @@
                 });
             }
             
+            if (testBtn) {
+                testBtn.addEventListener('click', function() {
+                    console.log('Test button clicked - showing fullscreen reminder');
+                    showFullscreenReminder();
+                });
+            }
+            
             document.querySelectorAll('.favorite-btn').forEach((btn, index) => {
                 btn.addEventListener('click', function() {
                     playFavorite(index);
@@ -1665,7 +1685,7 @@
             // Check if user prefers fullscreen and show reminder if needed (no auto-attempt)
             const shouldShowFullscreenReminder = loadFullscreenPreference();
             if (shouldShowFullscreenReminder && isFullscreenSupported()) {
-                console.log('User prefers fullscreen - showing reminder on startup');
+                console.log('User prefers fullscreen - showing reminder on startup (no auto-fullscreen)');
                 // Show reminder after a brief delay to ensure page is loaded
                 setTimeout(() => {
                     showFullscreenReminder();
