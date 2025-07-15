@@ -609,6 +609,29 @@
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         }
 
+        function handlePageFocus() {
+            // When page regains focus, check if user had fullscreen preference
+            const shouldBeFullscreen = loadFullscreenPreference();
+            const isCurrentlyFullscreen = !!(document.fullscreenElement || 
+                                           document.webkitFullscreenElement || 
+                                           document.mozFullScreenElement || 
+                                           document.msFullscreenElement);
+            
+            // If user prefers fullscreen but we're not in fullscreen, re-enter it
+            if (shouldBeFullscreen && !isCurrentlyFullscreen && isFullscreenSupported()) {
+                console.log('Page regained focus - restoring fullscreen based on saved preference');
+                // Small delay to ensure focus is fully restored
+                setTimeout(() => {
+                    toggleFullscreen();
+                }, 200);
+            }
+        }
+
+        function handlePageBlur() {
+            // Optional: Log when page loses focus (for debugging)
+            console.log('Page lost focus');
+        }
+
         async function playStation(station) {
             currentStation = station;
             saveLastPlayed(station);
@@ -1507,6 +1530,18 @@
             window.addEventListener('resize', handleViewportResize);
             window.addEventListener('orientationchange', () => {
                 setTimeout(handleViewportResize, 100);
+            });
+            
+            // Handle page focus/blur events for fullscreen restoration
+            window.addEventListener('focus', handlePageFocus);
+            window.addEventListener('blur', handlePageBlur);
+            
+            // Also handle visibility change (covers more browser scenarios)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Page became visible again
+                    handlePageFocus();
+                }
             });
             
             handleViewportResize();
