@@ -43,6 +43,8 @@
             padding: 0 20px;
             justify-content: space-between;
             flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
         }
 
         .now-playing {
@@ -50,11 +52,16 @@
             font-size: 18px;
             font-weight: bold;
             color: #ffffff;
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
         }
 
         .control-buttons {
             display: flex;
             gap: 10px;
+            position: relative;
+            z-index: 10;
         }
 
         .control-btn {
@@ -1629,12 +1636,26 @@
             }
             
             if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', function() {
+                fullscreenBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent triggering the top-bar click
                     console.log('Fullscreen button clicked');
                     toggleFullscreen().catch(err => {
-                        // Remove the error notification - it works anyway
                         console.log('Fullscreen request had issues but may have worked');
                     });
+                });
+            }
+            
+            // Make the entire top bar clickable for fullscreen (except buttons)
+            const topControls = document.querySelector('.top-controls');
+            if (topControls) {
+                topControls.addEventListener('click', function(e) {
+                    // Only trigger if clicking on the background, not on buttons
+                    if (e.target === topControls || e.target.classList.contains('now-playing')) {
+                        console.log('Top bar background clicked - toggling fullscreen');
+                        toggleFullscreen().catch(err => {
+                            console.log('Fullscreen request had issues but may have worked');
+                        });
+                    }
                 });
             }
             
