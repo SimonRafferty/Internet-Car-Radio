@@ -1656,31 +1656,102 @@
             
             window.addEventListener('resize', handleViewportResize);
             window.addEventListener('orientationchange', () => {
+                console.log('=== ORIENTATION CHANGE EVENT FIRED ===');
                 setTimeout(handleViewportResize, 100);
             });
             
             // Handle page focus/blur events for fullscreen restoration
-            window.addEventListener('focus', handlePageFocus);
-            window.addEventListener('blur', handlePageBlur);
+            window.addEventListener('focus', function() {
+                console.log('=== WINDOW FOCUS EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            window.addEventListener('blur', function() {
+                console.log('=== WINDOW BLUR EVENT FIRED ===');
+                handlePageBlur();
+            });
+            
+            // Try document focus/blur as well
+            document.addEventListener('focus', function() {
+                console.log('=== DOCUMENT FOCUS EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            document.addEventListener('blur', function() {
+                console.log('=== DOCUMENT BLUR EVENT FIRED ===');
+                handlePageBlur();
+            });
             
             // Also handle visibility change (covers more browser scenarios)
             document.addEventListener('visibilitychange', function() {
+                console.log('=== VISIBILITY CHANGE EVENT FIRED ===');
+                console.log('document.hidden:', document.hidden);
                 if (!document.hidden) {
-                    // Page became visible again
+                    console.log('Page became visible - calling handlePageFocus()');
                     handlePageFocus();
+                } else {
+                    console.log('Page became hidden');
                 }
             });
+            
+            // Try page show/hide events
+            window.addEventListener('pageshow', function() {
+                console.log('=== PAGE SHOW EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            window.addEventListener('pagehide', function() {
+                console.log('=== PAGE HIDE EVENT FIRED ===');
+            });
+            
+            // Try beforeunload/unload
+            window.addEventListener('beforeunload', function() {
+                console.log('=== BEFORE UNLOAD EVENT FIRED ===');
+            });
+            
+            // Try resize (sometimes triggered when switching)
+            window.addEventListener('resize', function() {
+                console.log('=== RESIZE EVENT FIRED ===');
+                handleViewportResize();
+            });
+            
+            // Try mouse/pointer events that might indicate user return
+            document.addEventListener('mouseenter', function() {
+                console.log('=== MOUSE ENTER EVENT FIRED ===');
+            });
+            
+            document.addEventListener('mousemove', function() {
+                console.log('=== MOUSE MOVE EVENT FIRED ===');
+            }, { once: true }); // Only log the first one to avoid spam
+            
+            document.addEventListener('click', function() {
+                console.log('=== CLICK EVENT FIRED ===');
+            }, { once: true }); // Only log the first one
+            
+            // Try touch events for mobile
+            document.addEventListener('touchstart', function() {
+                console.log('=== TOUCH START EVENT FIRED ===');
+            }, { once: true });
+            
+            console.log('=== ALL EVENT LISTENERS REGISTERED ===');
             
             handleViewportResize();
             
             // Check if user prefers fullscreen and show reminder if needed (using test button logic)
             const shouldShowFullscreenReminder = loadFullscreenPreference();
+            console.log('=== PAGE LOAD CHECK ===');
+            console.log('shouldShowFullscreenReminder:', shouldShowFullscreenReminder);
+            console.log('isFullscreenSupported():', isFullscreenSupported());
+            
             if (shouldShowFullscreenReminder && isFullscreenSupported()) {
-                console.log('User prefers fullscreen - showing reminder on startup (using test button logic)');
+                console.log('PAGE LOAD CONDITIONS MET - will show reminder in 1 second');
                 // Show reminder after a brief delay to ensure page is loaded
                 setTimeout(() => {
+                    console.log('PAGE LOAD TIMEOUT - calling showFullscreenReminder()');
                     showFullscreenReminder();
                 }, 1000);
+            } else {
+                console.log('PAGE LOAD CONDITIONS NOT MET - no reminder on startup');
             }
             
             const lastPlayed = loadLastPlayed();
