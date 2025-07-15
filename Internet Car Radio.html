@@ -533,21 +533,43 @@
                         const docEl = document.documentElement;
                         
                         if (docEl.requestFullscreen) {
-                            docEl.requestFullscreen().then(resolve).catch(reject);
+                            docEl.requestFullscreen().then(resolve).catch(err => {
+                                console.log('Fullscreen denied by browser security policy');
+                                reject(err);
+                            });
                         } else if (docEl.webkitRequestFullscreen) {
-                            docEl.webkitRequestFullscreen();
-                            resolve();
+                            try {
+                                docEl.webkitRequestFullscreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Webkit fullscreen denied');
+                                reject(err);
+                            }
                         } else if (docEl.webkitRequestFullScreen) {
-                            docEl.webkitRequestFullScreen();
-                            resolve();
+                            try {
+                                docEl.webkitRequestFullScreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Webkit fullscreen denied');
+                                reject(err);
+                            }
                         } else if (docEl.mozRequestFullScreen) {
-                            docEl.mozRequestFullScreen();
-                            resolve();
+                            try {
+                                docEl.mozRequestFullScreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Firefox fullscreen denied');
+                                reject(err);
+                            }
                         } else if (docEl.msRequestFullscreen) {
-                            docEl.msRequestFullscreen();
-                            resolve();
+                            try {
+                                docEl.msRequestFullscreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('IE/Edge fullscreen denied');
+                                reject(err);
+                            }
                         } else {
-                            showFeedbackMessage('Fullscreen not supported in this browser');
                             reject(new Error('Fullscreen not supported'));
                             return;
                         }
@@ -574,8 +596,7 @@
                         }
                     }
                 } catch (error) {
-                    console.error('Fullscreen error:', error);
-                    showFeedbackMessage('Fullscreen operation failed');
+                    console.log('Fullscreen operation blocked by browser');
                     reject(error);
                 }
             });
@@ -655,7 +676,7 @@
                     text-align: center;
                     pointer-events: none;
                 `;
-                reminderEl.innerHTML = 'Tap anywhere to restore fullscreen ⛶';
+                reminderEl.innerHTML = 'Touch anywhere to resume fullscreen ⛶';
                 
                 document.body.appendChild(reminderEl);
             }
@@ -685,16 +706,19 @@
             
             reminderEl.style.opacity = '1';
             
-            // Auto-hide after 8 seconds (increased for safer driving)
+            // Auto-hide after 5 seconds (back to your preferred time)
             setTimeout(() => {
                 hideFullscreenReminder();
-            }, 8000);
+            }, 5000);
         }
 
         function restoreFullscreenFromTap(e) {
             e.preventDefault();
             e.stopPropagation();
-            toggleFullscreen();
+            toggleFullscreen().catch(err => {
+                // Silently handle fullscreen denial - no user feedback needed
+                console.log('Fullscreen tap ignored due to browser restrictions');
+            });
             hideFullscreenReminder();
         }
 
@@ -1596,7 +1620,10 @@
             if (fullscreenBtn) {
                 fullscreenBtn.addEventListener('click', function() {
                     console.log('Fullscreen button clicked');
-                    toggleFullscreen();
+                    toggleFullscreen().catch(err => {
+                        // Handle manual fullscreen button errors gracefully
+                        showFeedbackMessage('Fullscreen blocked by browser');
+                    });
                 });
             }
             
@@ -1635,17 +1662,14 @@
             
             handleViewportResize();
             
-            // Auto-enter fullscreen if user had it enabled last time
-            const shouldAutoFullscreen = loadFullscreenPreference();
-            if (shouldAutoFullscreen && isFullscreenSupported()) {
-                console.log('Auto-entering fullscreen based on saved preference');
-                // Delay slightly to ensure page is fully loaded
+            // Check if user prefers fullscreen and show reminder if needed (no auto-attempt)
+            const shouldShowFullscreenReminder = loadFullscreenPreference();
+            if (shouldShowFullscreenReminder && isFullscreenSupported()) {
+                console.log('User prefers fullscreen - showing reminder on startup');
+                // Show reminder after a brief delay to ensure page is loaded
                 setTimeout(() => {
-                    toggleFullscreen().catch(() => {
-                        // If auto-fullscreen fails, show the reminder instead
-                        console.log('Auto-fullscreen blocked by browser - will show reminder on focus');
-                    });
-                }, 500);
+                    showFullscreenReminder();
+                }, 1000);
             }
             
             const lastPlayed = loadLastPlayed();
