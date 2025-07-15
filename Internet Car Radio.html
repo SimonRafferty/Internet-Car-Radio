@@ -511,6 +511,15 @@
             localStorage.setItem('carRadioLastPlayed', JSON.stringify(station));
         }
         
+        function loadFullscreenPreference() {
+            const saved = localStorage.getItem('carRadioFullscreenPreference');
+            return saved === 'true';
+        }
+        
+        function saveFullscreenPreference(isFullscreen) {
+            localStorage.setItem('carRadioFullscreenPreference', isFullscreen.toString());
+        }
+        
         function truncateText(text, maxLength) {
             return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
         }
@@ -572,6 +581,9 @@
                                        document.webkitFullscreenElement || 
                                        document.mozFullScreenElement || 
                                        document.msFullscreenElement);
+                
+                // Save fullscreen state
+                saveFullscreenPreference(isFullscreen);
                 
                 if (isFullscreen) {
                     fullscreenBtn.textContent = '⛉';
@@ -1498,6 +1510,16 @@
             });
             
             handleViewportResize();
+            
+            // Auto-enter fullscreen if user had it enabled last time
+            const shouldAutoFullscreen = loadFullscreenPreference();
+            if (shouldAutoFullscreen && isFullscreenSupported()) {
+                console.log('Auto-entering fullscreen based on saved preference');
+                // Delay slightly to ensure page is fully loaded
+                setTimeout(() => {
+                    toggleFullscreen();
+                }, 500);
+            }
             
             const lastPlayed = loadLastPlayed();
             if (lastPlayed) {
