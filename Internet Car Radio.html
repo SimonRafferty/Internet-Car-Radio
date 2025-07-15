@@ -525,53 +525,60 @@
         }
 
         function toggleFullscreen() {
-            try {
-                if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-                    !document.mozFullScreenElement && !document.msFullscreenElement) {
-                    
-                    const docEl = document.documentElement;
-                    
-                    if (docEl.requestFullscreen) {
-                        docEl.requestFullscreen().catch(err => {
-                            console.log('Fullscreen request failed:', err);
-                            showFeedbackMessage('Fullscreen not supported');
-                        });
-                    } else if (docEl.webkitRequestFullscreen) {
-                        docEl.webkitRequestFullscreen();
-                    } else if (docEl.webkitRequestFullScreen) {
-                        docEl.webkitRequestFullScreen();
-                    } else if (docEl.mozRequestFullScreen) {
-                        docEl.mozRequestFullScreen();
-                    } else if (docEl.msRequestFullscreen) {
-                        docEl.msRequestFullscreen();
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                        !document.mozFullScreenElement && !document.msFullscreenElement) {
+                        
+                        const docEl = document.documentElement;
+                        
+                        if (docEl.requestFullscreen) {
+                            docEl.requestFullscreen().then(resolve).catch(reject);
+                        } else if (docEl.webkitRequestFullscreen) {
+                            docEl.webkitRequestFullscreen();
+                            resolve();
+                        } else if (docEl.webkitRequestFullScreen) {
+                            docEl.webkitRequestFullScreen();
+                            resolve();
+                        } else if (docEl.mozRequestFullScreen) {
+                            docEl.mozRequestFullScreen();
+                            resolve();
+                        } else if (docEl.msRequestFullscreen) {
+                            docEl.msRequestFullscreen();
+                            resolve();
+                        } else {
+                            showFeedbackMessage('Fullscreen not supported in this browser');
+                            reject(new Error('Fullscreen not supported'));
+                            return;
+                        }
+                        
+                        setTimeout(() => {
+                            window.scrollTo(0, 1);
+                        }, 100);
+                        
                     } else {
-                        showFeedbackMessage('Fullscreen not supported in this browser');
-                        return;
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen().then(resolve).catch(reject);
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                            resolve();
+                        } else if (document.webkitCancelFullScreen) {
+                            document.webkitCancelFullScreen();
+                            resolve();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                            resolve();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                            resolve();
+                        }
                     }
-                    
-                    setTimeout(() => {
-                        window.scrollTo(0, 1);
-                    }, 100);
-                    
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(err => {
-                            console.log('Exit fullscreen failed:', err);
-                        });
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.webkitCancelFullScreen) {
-                        document.webkitCancelFullScreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
+                } catch (error) {
+                    console.error('Fullscreen error:', error);
+                    showFeedbackMessage('Fullscreen operation failed');
+                    reject(error);
                 }
-            } catch (error) {
-                console.error('Fullscreen error:', error);
-                showFeedbackMessage('Fullscreen operation failed');
-            }
+            });
         }
 
         function updateFullscreenButton() {
@@ -617,13 +624,95 @@
                                            document.mozFullScreenElement || 
                                            document.msFullscreenElement);
             
-            // If user prefers fullscreen but we're not in fullscreen, re-enter it
+            // If user prefers fullscreen but we're not in fullscreen, show a prompt
             if (shouldBeFullscreen && !isCurrentlyFullscreen && isFullscreenSupported()) {
-                console.log('Page regained focus - restoring fullscreen based on saved preference');
-                // Small delay to ensure focus is fully restored
+                console.log('Page regained focus - showing fullscreen reminder');
+                showFullscreenReminder();
+            }
+        }
+
+        function showFullscreenReminder() {
+            // Create a temporary notification and full-screen tap area
+            let reminderEl = document.getElementById('fullscreenReminder');
+            if (!reminderEl) {
+                reminderEl = document.createElement('div');
+                reminderEl.id = 'fullscreenReminder';
+                reminderEl.style.cssText = `
+                    position: fixed;
+                    top: 70px;
+                    right: 20px;
+                    background: #6f42c1;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    z-index: 1001;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    font-size: 14px;
+                    max-width: 250px;
+                    text-align: center;
+                    pointer-events: none;
+                `;
+                reminderEl.innerHTML = 'Tap anywhere to restore fullscreen ⛶';
+                
+                document.body.appendChild(reminderEl);
+            }
+            
+            // Create invisible full-screen tap area
+            let tapArea = document.getElementById('fullscreenTapArea');
+            if (!tapArea) {
+                tapArea = document.createElement('div');
+                tapArea.id = 'fullscreenTapArea';
+                tapArea.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 1000;
+                    background: rgba(0,0,0,0);
+                    cursor: pointer;
+                `;
+                
+                // Both click and touch events for maximum compatibility
+                tapArea.addEventListener('click', restoreFullscreenFromTap);
+                tapArea.addEventListener('touchend', restoreFullscreenFromTap);
+                
+                document.body.appendChild(tapArea);
+            }
+            
+            reminderEl.style.opacity = '1';
+            
+            // Auto-hide after 8 seconds (increased for safer driving)
+            setTimeout(() => {
+                hideFullscreenReminder();
+            }, 8000);
+        }
+
+        function restoreFullscreenFromTap(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFullscreen();
+            hideFullscreenReminder();
+        }
+
+        function hideFullscreenReminder() {
+            const reminderEl = document.getElementById('fullscreenReminder');
+            const tapArea = document.getElementById('fullscreenTapArea');
+            
+            if (reminderEl) {
+                reminderEl.style.opacity = '0';
                 setTimeout(() => {
-                    toggleFullscreen();
-                }, 200);
+                    if (reminderEl.parentNode) {
+                        reminderEl.parentNode.removeChild(reminderEl);
+                    }
+                }, 300);
+            }
+            
+            if (tapArea && tapArea.parentNode) {
+                tapArea.parentNode.removeChild(tapArea);
             }
         }
 
@@ -1552,7 +1641,10 @@
                 console.log('Auto-entering fullscreen based on saved preference');
                 // Delay slightly to ensure page is fully loaded
                 setTimeout(() => {
-                    toggleFullscreen();
+                    toggleFullscreen().catch(() => {
+                        // If auto-fullscreen fails, show the reminder instead
+                        console.log('Auto-fullscreen blocked by browser - will show reminder on focus');
+                    });
                 }, 500);
             }
             
