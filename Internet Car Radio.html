@@ -432,7 +432,6 @@
             <button class="control-btn delete" id="deleteBtn">✕</button>
             <button class="control-btn" id="searchBtn">Search</button>
             <button class="control-btn" id="fullscreenBtn">⛶</button>
-            <button class="control-btn" id="testBtn" style="font-size: 12px;">Test</button>
         </div>
     </div>
 
@@ -728,8 +727,8 @@
             e.stopPropagation();
             console.log('User tapped to restore fullscreen');
             toggleFullscreen().catch(err => {
-                console.log('Fullscreen request failed even from user tap:', err);
-                showFeedbackMessage('Fullscreen blocked by browser');
+                console.log('Fullscreen request failed but may still work:', err);
+                // Don't show error message since it often works anyway
             });
             hideFullscreenReminder();
         }
@@ -1504,7 +1503,6 @@
             const nextBtn = document.getElementById('nextBtn');
             const modalAddBtn = document.getElementById('modalAddBtn');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
-            const testBtn = document.getElementById('testBtn');
             
             audio.addEventListener('play', function() {
                 isPlaying = true;
@@ -1634,16 +1632,9 @@
                 fullscreenBtn.addEventListener('click', function() {
                     console.log('Fullscreen button clicked');
                     toggleFullscreen().catch(err => {
-                        // Handle manual fullscreen button errors gracefully
-                        showFeedbackMessage('Fullscreen blocked by browser');
+                        // Remove the error notification - it works anyway
+                        console.log('Fullscreen request had issues but may have worked');
                     });
-                });
-            }
-            
-            if (testBtn) {
-                testBtn.addEventListener('click', function() {
-                    console.log('Test button clicked - showing fullscreen reminder');
-                    showFullscreenReminder();
                 });
             }
             
@@ -1682,10 +1673,10 @@
             
             handleViewportResize();
             
-            // Check if user prefers fullscreen and show reminder if needed (no auto-attempt)
+            // Check if user prefers fullscreen and show reminder if needed (using test button logic)
             const shouldShowFullscreenReminder = loadFullscreenPreference();
             if (shouldShowFullscreenReminder && isFullscreenSupported()) {
-                console.log('User prefers fullscreen - showing reminder on startup (no auto-fullscreen)');
+                console.log('User prefers fullscreen - showing reminder on startup (using test button logic)');
                 // Show reminder after a brief delay to ensure page is loaded
                 setTimeout(() => {
                     showFullscreenReminder();
