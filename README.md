@@ -47,7 +47,9 @@ Native Android app optimized for car head units and mobile phones. Overcomes bro
 - Optimized layouts: 4 columns for tablets/head units, 2 columns for phones
 
 **Installation:**
-Download the APK from the [Releases](https://github.com/SimonRafferty/Internet-Car-Radio/releases) page and install on your Android device.
+
+- **From GitHub:** Download the APK from the [Releases](https://github.com/SimonRafferty/Internet-Car-Radio/releases) page, enable "Install from Unknown Sources" in Android settings, and install
+- **From Google Play Store:** Coming soon
 
 ## Why This Exists
 
@@ -55,7 +57,7 @@ There are plenty of internet radio apps available, but none worked well on car h
 
 ## Building from Source
 
-### Android APK
+### Android App
 
 **Requirements:**
 - Android Studio (Arctic Fox or later)
@@ -74,26 +76,36 @@ cd Internet-Car-Radio
 
 3. Sync project with Gradle files (File → Sync Project with Gradle Files)
 
-4. Build the APK:
+4. Build a debug APK for testing:
    - Build → Build Bundle(s) / APK(s) → Build APK(s)
+   - The APK will be at: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-5. The APK will be located at:
-   ```
-   android/app/build/outputs/apk/release/Internet Car Radio.apk
-   ```
+**Creating Signed Release Builds:**
 
-**Creating a Signed Release Build:**
-
-For publishing to the Google Play Store or distributing to others, you need a signed APK:
+For production distribution, you need signed builds using your keystore:
 
 1. Build → Generate Signed Bundle / APK
-2. Select Android App Bundle (for Play Store) or APK (for direct distribution)
-3. Create a new keystore or use an existing one
-4. Save your keystore file and passwords securely
-5. Select the release build variant
-6. The signed APK/AAB will be generated
+2. Create a new keystore (first time only) or use an existing one
+3. Save your keystore file and passwords securely
+4. Choose build type:
 
-**Important:** Keep your keystore file and passwords safe. If you lose them, you cannot update your app on the Play Store.
+**For Google Play Store:**
+- Select **Android App Bundle (AAB)**
+- Select **release** build variant
+- The signed AAB will be at: `android/app/build/outputs/bundle/release/Internet Car Radio.aab`
+- Upload this AAB to Google Play Console
+
+**For Direct Distribution (sideloading):**
+- Select **APK**
+- Select **release** build variant
+- The signed APK will be at: `android/app/build/outputs/apk/release/Internet Car Radio.apk`
+- Distribute via GitHub Releases or other channels
+
+**Important Notes:**
+- AAB files can ONLY be used with Google Play Store - they cannot be installed directly on devices
+- APK files can be installed directly on Android devices (requires "Install from Unknown Sources")
+- Keep your keystore file and passwords safe - if you lose them, you cannot update your app on the Play Store
+- Neither AAB nor APK files should be committed to git - distribute via GitHub Releases instead
 
 For detailed build instructions, see `android/README.md`.
 
