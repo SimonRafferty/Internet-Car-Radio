@@ -74,6 +74,8 @@
             flex: 1;
             min-width: 70px;
             white-space: nowrap;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
         }
 
         /* Hide fullscreen button - not needed in APK, replace with info button */
@@ -85,9 +87,9 @@
         .app-footer {
             background: #0a0a0a;
             border-top: 2px solid #333333;
-            padding: 15px 20px;
+            padding: 20px;
             text-align: center;
-            flex-shrink: 0;
+            margin-top: 20px;
         }
 
         .support-btn {
@@ -109,24 +111,14 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.6);
         }
 
-        .footer-text {
-            color: #888888;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
         @media (max-width: 700px) {
             .app-footer {
-                padding: 12px 15px;
+                padding: 15px;
             }
 
             .support-btn {
                 font-size: 13px;
                 padding: 8px 25px;
-            }
-
-            .footer-text {
-                font-size: 11px;
             }
         }
 
@@ -200,17 +192,21 @@
             background: #ff1e2e;
         }
 
-        .favorites-section {
+        .content-wrapper {
             flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #111111;
+            min-height: 0;
+        }
+
+        .favorites-section {
             padding: 10px;
             display: grid;
             gap: 8px;
             background: #111111;
-            overflow-y: auto;
-            overflow-x: hidden;
             grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: minmax(120px, max-content);
-            min-height: 0;
         }
 
         /* Mobile: 2 columns */
@@ -239,6 +235,8 @@
             justify-content: center;
             padding: 8px;
             min-height: 120px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
         }
 
         .favorite-logo-img {
@@ -651,28 +649,29 @@
         </div>
     </div>
 
-    <div class="favorites-section">
-        <div class="favorite-btn empty" data-index="0">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="1">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="2">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="3">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="4">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="5">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="6">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="7">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="8">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="9">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="10">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="11">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="12">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="13">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="14">Empty Slot</div>
-        <div class="favorite-btn empty" data-index="15">Empty Slot</div>
-    </div>
+    <div class="content-wrapper">
+        <div class="favorites-section">
+            <div class="favorite-btn empty" data-index="0">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="1">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="2">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="3">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="4">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="5">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="6">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="7">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="8">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="9">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="10">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="11">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="12">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="13">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="14">Empty Slot</div>
+            <div class="favorite-btn empty" data-index="15">Empty Slot</div>
+        </div>
 
-    <div class="app-footer">
-        <button class="support-btn" id="supportBtn">☕ Buy Me a Coffee</button>
-        <div class="footer-text">Enjoying the app? Support development!</div>
+        <div class="app-footer">
+            <button class="support-btn" id="supportBtn">Buy Me a Coffee</button>
+        </div>
     </div>
 
     <div class="modal" id="searchModal">
@@ -1729,13 +1728,18 @@
                 isPlaying = true;
                 playBtn.style.display = 'none';
                 pauseBtn.style.display = 'block';
+
+                // Notify Android of play state for media controls
+                if (typeof AndroidMediaControl !== 'undefined') {
+                    AndroidMediaControl.notifyPlaying();
+                }
             });
-            
+
             audio.addEventListener('pause', function() {
                 isPlaying = false;
                 playBtn.style.display = 'block';
                 pauseBtn.style.display = 'none';
-                
+
                 if (isRetrying) {
                     isRetrying = false;
                     if (retryInterval) {
@@ -1744,9 +1748,14 @@
                     }
                     console.log('User paused - stopping retry attempts');
                 }
-                
+
                 if (currentStation) {
                     document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                }
+
+                // Notify Android of pause state for media controls
+                if (typeof AndroidMediaControl !== 'undefined') {
+                    AndroidMediaControl.notifyPaused();
                 }
             });
             
@@ -2016,6 +2025,83 @@
         });
         
         console.log('JavaScript file loaded completely');
+
+        // Steering wheel control handlers (called from Android MediaSession)
+        window.handleMediaPlay = function() {
+            console.log('Media control: Play');
+            const audio = document.getElementById('audioPlayer');
+            if (currentStation && !isPlaying) {
+                audio.play().catch(error => {
+                    console.log('Play failed:', error);
+                });
+            }
+        };
+
+        window.handleMediaPause = function() {
+            console.log('Media control: Pause');
+            const audio = document.getElementById('audioPlayer');
+            if (isPlaying) {
+                audio.pause();
+            }
+        };
+
+        window.handleMediaNext = function() {
+            console.log('Media control: Next');
+            // Navigate to next favorite
+            if (!currentStation) {
+                // If nothing is playing, play the first favorite
+                for (let i = 0; i < 16; i++) {
+                    if (favorites[i]) {
+                        playFavorite(i);
+                        return;
+                    }
+                }
+                return;
+            }
+
+            const currentIndex = favorites.findIndex(f => f && currentStation && f.url === currentStation.url);
+            if (currentIndex !== -1) {
+                // Found current station in favorites, move to next
+                let nextIndex = (currentIndex + 1) % 16;
+                let attempts = 0;
+                while (!favorites[nextIndex] && attempts < 16) {
+                    nextIndex = (nextIndex + 1) % 16;
+                    attempts++;
+                }
+                if (favorites[nextIndex] && nextIndex !== currentIndex) {
+                    playFavorite(nextIndex);
+                }
+            }
+        };
+
+        window.handleMediaPrevious = function() {
+            console.log('Media control: Previous');
+            // Navigate to previous favorite
+            if (!currentStation) {
+                // If nothing is playing, play the last favorite
+                for (let i = 15; i >= 0; i--) {
+                    if (favorites[i]) {
+                        playFavorite(i);
+                        return;
+                    }
+                }
+                return;
+            }
+
+            const currentIndex = favorites.findIndex(f => f && currentStation && f.url === currentStation.url);
+            if (currentIndex !== -1) {
+                // Found current station in favorites, move to previous
+                let prevIndex = (currentIndex - 1 + 16) % 16;
+                let attempts = 0;
+                while (!favorites[prevIndex] && attempts < 16) {
+                    prevIndex = (prevIndex - 1 + 16) % 16;
+                    attempts++;
+                }
+                if (favorites[prevIndex] && prevIndex !== currentIndex) {
+                    playFavorite(prevIndex);
+                }
+            }
+        };
     </script>
 </body>
 </html>
