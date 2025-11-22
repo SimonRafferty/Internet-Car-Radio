@@ -4,11 +4,11 @@ A free, open-source internet radio app with support for both web browsers and An
 
 ## Overview
 
-After purchasing four different paid radio apps that all turned out to be unreliable and buggy, I built my own solution. This project provides a simple, clean interface for streaming internet radio with no ads, no tracking, and no unnecessary complexity.
+After purchasing four different paid radio apps that all turned out to be a bit rubbish, The only option was to build my own! This project provides a simple, clean interface for streaming internet radio with no ads, no tracking, no BS and no unnecessary complexity.
 
 ## Features
 
-- Stream from 40,000+ internet radio stations via Radio Browser API
+- Stream from thousands of internet radio stations via Radio Browser API
 - 16 customizable favorite slots with station logos
 - Browse stations by genre (Electronic, Rock, Pop, Jazz, Classical, Country, and more)
 - Search stations by name
@@ -41,19 +41,26 @@ Native Android app optimized for car head units and mobile phones. Overcomes bro
 
 **Features:**
 - Auto-resume last station without user interaction
-- True fullscreen mode (no browser chrome)
+- True fullscreen mode
 - Background audio playback
 - Works on Android 7.0 (API 24) and above
 - Optimized layouts: 4 columns for tablets/head units, 2 columns for phones
 
 **Installation:**
 
-- **From GitHub:** Download the APK from the [Releases](https://github.com/SimonRafferty/Internet-Car-Radio/releases) page, enable "Install from Unknown Sources" in Android settings, and install
-- **From Google Play Store:** Coming soon
+- **From GitHub:** Download the APK from the [Releases](https://github.com/SimonRafferty/Internet-Car-Radio/releases) page.
+   Once you've downloaded the APK to your Android device, use a file manager app to navigate to your Downloads folder
+   and tap on the APK file. Android will scan the app for security, then prompt you to install it. If this is your
+   first time installing an app from outside the Google Play Store, you may need to enable "Install from Unknown
+   Sources" or "Install Unknown Apps" in your device settings - Android will guide you through this with a prompt.
+   After granting permission, tap Install and the app will be installed on your device. You can then find "Internet
+   Car Radio" in your app drawer and launch it like any other app.
+  
+- **From Google Play Store:** Hopefully coming soon if I can figure it out!
 
 ## Why This Exists
 
-There are plenty of internet radio apps available, but none worked well on car head units. After wasting money on four paid apps that were buggy messes, the only option was to build my own. This app focuses on simplicity, reliability, and usability while driving.
+There are plenty of internet radio apps available, but none worked well on my car head units (ATOTO). After wasting money on four paid apps that all had 'issues' or were unsafe to use while driving, the only option was to build my own. This app focuses on simplicity, reliability, and usability while driving.
 
 ## Building from Source
 
@@ -171,13 +178,6 @@ Stations are fetched from the Radio Browser Community API:
 - Stations filtered to show only those verified within the last 7 days
 - Sorted by vote count and logo availability
 
-### Responsive Design
-
-The interface adapts to different screen sizes:
-- **Desktop/Head Units (>700px width):** 4-column grid layout
-- **Mobile Phones (≤700px width):** 2-column grid layout
-- **Top control bar:** Wraps on narrow screens with buttons stacked above station info
-
 ### Data Persistence
 
 - **Web Version:** Uses browser LocalStorage to save favorites and last played station
@@ -221,25 +221,6 @@ The Android version uses the system WebView with:
 - Minimum Android version: 7.0 (API 24)
 - APK must be signed for installation (debug builds work for testing)
 - Some older car head units may not support modern WebView features
-
-## Contributing
-
-Contributions are welcome! Areas for improvement:
-
-- Additional genre categorizations
-- Station metadata display (bitrate, codec, country)
-- Playlist support
-- Sleep timer
-- Equalizer integration
-- Chromecast support
-- Translations to other languages
-
-Please follow these guidelines:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly on both web and Android versions
-5. Submit a pull request with a clear description
 
 ## License
 
