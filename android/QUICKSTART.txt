@@ -1,0 +1,50 @@
+QUICK START GUIDE - Internet Car Radio Android App
+==================================================
+
+FASTEST WAY TO BUILD:
+
+1. Install Android Studio from: https://developer.android.com/studio
+
+2. Open Android Studio → Open → Select the "android" folder
+
+3. Wait for Gradle sync to complete (5-10 minutes first time)
+
+4. Click: Build → Build Bundle(s) / APK(s) → Build APK(s)
+
+5. Your APK will be at: app/build/outputs/apk/debug/app-debug.apk
+
+6. Copy the APK to your Android device and install it
+
+
+ALTERNATIVE - COMMAND LINE BUILD:
+
+Windows:
+  cd android
+  gradlew.bat assembleDebug
+
+Linux/Mac:
+  cd android
+  ./gradlew assembleDebug
+
+
+KEY FEATURES IN THE APK:
+- Auto-resumes last station (no click needed!)
+- True fullscreen mode works on Android Car
+- Plays audio in background
+- No browser security restrictions
+
+
+COMMON ISSUES:
+
+Q: "SDK not found" error?
+A: Create "local.properties" file with:
+   sdk.dir=C\:\\Users\\YourName\\AppData\\Local\\Android\\Sdk
+
+Q: Gradle sync fails?
+A: Make sure you have internet connection, wait for downloads to complete
+
+Q: Can't install APK?
+A: Enable "Install from Unknown Sources" in Android settings
+
+
+For detailed instructions, see README.md

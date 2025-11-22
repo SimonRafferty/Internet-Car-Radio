@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Radio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            body {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        .top-controls {
+            min-height: 60px;
+            background: #111111;
+            border-bottom: 2px solid #333333;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            justify-content: space-between;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .now-playing {
+            flex: 1 1 auto;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            min-width: 200px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .control-btn {
+            background: #333333;
+            border: 2px solid #555555;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 45px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            flex: 1;
+            min-width: 70px;
+            white-space: nowrap;
+        }
+
+        /* Hide fullscreen button - not needed in APK, replace with info button */
+        #fullscreenBtn {
+            display: none;
+        }
+
+        /* Footer styling */
+        .app-footer {
+            background: #0a0a0a;
+            border-top: 2px solid #333333;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .support-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 20px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 10px 30px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .support-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.6);
+        }
+
+        .footer-text {
+            color: #888888;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 700px) {
+            .app-footer {
+                padding: 12px 15px;
+            }
+
+            .support-btn {
+                font-size: 13px;
+                padding: 8px 25px;
+            }
+
+            .footer-text {
+                font-size: 11px;
+            }
+        }
+
+        /* Mobile: buttons first, now-playing second */
+        @media (max-width: 700px) {
+            .top-controls {
+                padding: 8px;
+            }
+
+            .now-playing {
+                font-size: 14px;
+                width: 100%;
+                order: 2;
+                min-width: 100%;
+                text-align: center;
+            }
+
+            .control-buttons {
+                width: 100%;
+                order: 1;
+                gap: 5px;
+            }
+
+            .control-btn {
+                height: 42px;
+                font-size: 13px;
+                min-width: 0;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .control-btn {
+                height: 38px;
+                font-size: 12px;
+            }
+
+            .now-playing {
+                font-size: 13px;
+            }
+        }
+
+        .control-btn:hover {
+            background: #444444;
+            border-color: #666666;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        .control-btn.play {
+            background: #1e7e34;
+            border-color: #28a745;
+        }
+
+        .control-btn.pause {
+            background: #d39e00;
+            border-color: #ffc107;
+        }
+
+        .control-btn.add {
+            background: #6f42c1;
+            border-color: #8f5fe8;
+        }
+
+        .control-btn.delete {
+            background: #dc3545;
+            border-color: #ff1e2e;
+            color: #ffffff;
+        }
+
+        .control-btn.delete:hover {
+            background: #ff1e2e;
+        }
+
+        .favorites-section {
+            flex: 1;
+            padding: 10px;
+            display: grid;
+            gap: 8px;
+            background: #111111;
+            overflow-y: auto;
+            overflow-x: hidden;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(120px, max-content);
+            min-height: 0;
+        }
+
+        /* Mobile: 2 columns */
+        @media (max-width: 700px) {
+            .favorites-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 8px;
+            }
+        }
+
+        .favorite-btn {
+            background: #222222;
+            border: 2px solid #444444;
+            border-radius: 12px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            min-height: 120px;
+        }
+
+        .favorite-logo-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .favorite-name {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            color: #ffffff;
+            position: absolute;
+            bottom: 10px;
+            left: 5px;
+            right: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .favorite-btn:hover {
+            background: #333333;
+            border-color: #666666;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        .favorite-btn.playing {
+            border: 4px solid #dc3545;
+            background: #333333;
+        }
+
+        .favorite-btn.empty {
+            background: #1a1a1a;
+            color: #666666;
+            border-color: #333333;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #111111;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            height: calc(100vh - 20px);
+            max-height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #333333;
+            overflow: hidden;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            .modal-content {
+                height: calc(-webkit-fill-available - 20px);
+                max-height: calc(-webkit-fill-available - 20px);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333333;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .modal-now-playing {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: normal;
+            width: 100%;
+            text-align: left;
+            order: 3;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .modal-header h2 {
+                font-size: 18px;
+            }
+
+            .close-btn {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+
+            .modal-now-playing {
+                font-size: 10px;
+            }
+        }
+
+        .close-btn {
+            background: #6c757d;
+            border: 2px solid #868e96;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background: #868e96;
+        }
+
+        .stations-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(120px, max-content);
+            gap: 8px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 5px;
+            min-height: 0;
+        }
+
+        /* Mobile: 2 columns to match favorites */
+        @media (max-width: 700px) {
+            .stations-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 8px;
+            }
+        }
+
+        .genre-btn {
+            background: #222222;
+            border: 2px solid #444444;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            min-height: 80px;
+        }
+
+        .genre-btn:hover {
+            background: #333333;
+            border-color: #666666;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Responsive genre buttons */
+        @media (max-width: 600px) {
+            .genre-btn {
+                font-size: 20px;
+                min-height: 70px;
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .genre-btn {
+                font-size: 16px;
+                min-height: 60px;
+                padding: 4px;
+            }
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            background: #333333;
+            border: 2px solid #555555;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .page-btn:hover:not(.disabled) {
+            background: #444444;
+            border-color: #666666;
+        }
+
+        .page-btn.disabled {
+            background: #1a1a1a;
+            border-color: #333333;
+            color: #666666;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #ffffff;
+            font-size: 14px;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 700px) {
+            .pagination-controls {
+                gap: 8px;
+            }
+
+            .pagination-controls .control-btn {
+                min-width: 60px;
+            }
+
+            .page-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .page-info {
+                font-size: 13px;
+                margin: 0 5px;
+            }
+        }
+
+        .station-btn {
+            background: #222222;
+            border: 2px solid #444444;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            min-height: 80px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .station-btn:hover {
+            background: #333333;
+            border-color: #666666;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        .station-logo-img {
+            width: 90%;
+            height: 90%;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .station-name {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            color: #ffffff;
+            width: 100%;
+            height: 10%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: auto;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Responsive station buttons */
+        @media (max-width: 500px) {
+            .station-btn {
+                min-height: 70px;
+                padding: 6px;
+            }
+
+            .station-name {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .station-btn {
+                min-height: 60px;
+                padding: 4px;
+            }
+
+            .station-name {
+                font-size: 11px;
+            }
+        }
+
+        .back-btn, .retry-btn {
+            background: #6c757d;
+            border: 2px solid #868e96;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .back-btn:hover, .retry-btn:hover {
+            background: #868e96;
+        }
+
+        .loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        /* Search container styling */
+        .search-container {
+            grid-column: 1 / -1;
+            padding: 15px;
+            background: #222;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-container input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #444;
+            border-radius: 6px;
+            background: #333;
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-container button {
+            padding: 10px 20px;
+            background: #28a745;
+            border: 2px solid #34ce57;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 700px) {
+            .search-container {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .search-container input {
+                width: 100%;
+                min-width: 100%;
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .search-container button {
+                width: 100%;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-controls">
+        <div class="now-playing" id="nowPlaying">Select a station to play</div>
+        <div class="control-buttons">
+            <button class="control-btn play" id="playBtn">▶</button>
+            <button class="control-btn pause" id="pauseBtn" style="display: none;">⏸</button>
+            <button class="control-btn add" id="addBtn">+</button>
+            <button class="control-btn delete" id="deleteBtn">✕</button>
+            <button class="control-btn" id="searchBtn">Search</button>
+            <button class="control-btn" id="fullscreenBtn">⛶</button>
+        </div>
+    </div>
+
+    <div class="favorites-section">
+        <div class="favorite-btn empty" data-index="0">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="1">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="2">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="3">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="4">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="5">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="6">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="7">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="8">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="9">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="10">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="11">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="12">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="13">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="14">Empty Slot</div>
+        <div class="favorite-btn empty" data-index="15">Empty Slot</div>
+    </div>
+
+    <div class="app-footer">
+        <button class="support-btn" id="supportBtn">☕ Buy Me a Coffee</button>
+        <div class="footer-text">Enjoying the app? Support development!</div>
+    </div>
+
+    <div class="modal" id="searchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Select Station</h2>
+                <div id="modalNowPlaying" class="modal-now-playing" style="display: none;">
+                    Now Playing: <span id="modalCurrentStation"></span>
+                </div>
+                <button class="close-btn" id="closeModal">Back</button>
+            </div>
+            
+            <div class="pagination-controls" id="paginationControls" style="display: none;">
+                <button class="control-btn add" id="modalAddBtn" style="margin-right: auto;">+</button>
+                <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                <button class="page-btn" id="prevBtn">↑</button>
+                <button class="page-btn" id="nextBtn">↓</button>
+            </div>
+            
+            <div class="stations-grid" id="stationsGrid">
+                <div class="loading">Click a genre to start</div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" preload="none" crossorigin="anonymous"></audio>
+
+    <script>
+        console.log('Starting JavaScript initialization...');
+        
+        let currentStation = null;
+        let isPlaying = false;
+        let favorites = [];
+        let currentStations = [];
+        let currentPage = 0;
+        let currentGenre = '';
+        let navigationStack = [];
+        let genreGroups = {};
+        let retryInterval = null;
+        let isRetrying = false;
+        
+        function loadFavorites() {
+            const saved = localStorage.getItem('carRadioFavorites');
+            return saved ? JSON.parse(saved) : [];
+        }
+        
+        function saveFavorites() {
+            localStorage.setItem('carRadioFavorites', JSON.stringify(favorites));
+        }
+        
+        function loadLastPlayed() {
+            const saved = localStorage.getItem('carRadioLastPlayed');
+            return saved ? JSON.parse(saved) : null;
+        }
+        
+        function saveLastPlayed(station) {
+            localStorage.setItem('carRadioLastPlayed', JSON.stringify(station));
+        }
+        
+        function loadFullscreenPreference() {
+            const saved = localStorage.getItem('carRadioFullscreenPreference');
+            return saved === 'true';
+        }
+        
+        function saveFullscreenPreference(isFullscreen) {
+            localStorage.setItem('carRadioFullscreenPreference', isFullscreen.toString());
+        }
+        
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+        }
+
+        function toggleFullscreen() {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                        !document.mozFullScreenElement && !document.msFullscreenElement) {
+                        
+                        const docEl = document.documentElement;
+                        
+                        if (docEl.requestFullscreen) {
+                            docEl.requestFullscreen().then(resolve).catch(err => {
+                                console.log('Fullscreen denied by browser security policy');
+                                reject(err);
+                            });
+                        } else if (docEl.webkitRequestFullscreen) {
+                            try {
+                                docEl.webkitRequestFullscreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Webkit fullscreen denied');
+                                reject(err);
+                            }
+                        } else if (docEl.webkitRequestFullScreen) {
+                            try {
+                                docEl.webkitRequestFullScreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Webkit fullscreen denied');
+                                reject(err);
+                            }
+                        } else if (docEl.mozRequestFullScreen) {
+                            try {
+                                docEl.mozRequestFullScreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('Firefox fullscreen denied');
+                                reject(err);
+                            }
+                        } else if (docEl.msRequestFullscreen) {
+                            try {
+                                docEl.msRequestFullscreen();
+                                resolve();
+                            } catch (err) {
+                                console.log('IE/Edge fullscreen denied');
+                                reject(err);
+                            }
+                        } else {
+                            reject(new Error('Fullscreen not supported'));
+                            return;
+                        }
+                        
+                        setTimeout(() => {
+                            window.scrollTo(0, 1);
+                        }, 100);
+                        
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen().then(resolve).catch(reject);
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                            resolve();
+                        } else if (document.webkitCancelFullScreen) {
+                            document.webkitCancelFullScreen();
+                            resolve();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                            resolve();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                            resolve();
+                        }
+                    }
+                } catch (error) {
+                    console.log('Fullscreen operation blocked by browser');
+                    reject(error);
+                }
+            });
+        }
+
+        function updateFullscreenButton() {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (fullscreenBtn) {
+                const isFullscreen = !!(document.fullscreenElement || 
+                                       document.webkitFullscreenElement || 
+                                       document.mozFullScreenElement || 
+                                       document.msFullscreenElement);
+                
+                // Save fullscreen state
+                saveFullscreenPreference(isFullscreen);
+                
+                if (isFullscreen) {
+                    fullscreenBtn.textContent = '⛉';
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Enter Fullscreen';
+                }
+            }
+        }
+
+        function isFullscreenSupported() {
+            const docEl = document.documentElement;
+            return !!(docEl.requestFullscreen || 
+                     docEl.webkitRequestFullscreen || 
+                     docEl.webkitRequestFullScreen ||
+                     docEl.mozRequestFullScreen || 
+                     docEl.msRequestFullscreen);
+        }
+
+        function handleViewportResize() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        function handlePageFocus() {
+            // When page regains focus, check if user had fullscreen preference
+            const shouldBeFullscreen = loadFullscreenPreference();
+            const isCurrentlyFullscreen = !!(document.fullscreenElement || 
+                                           document.webkitFullscreenElement || 
+                                           document.mozFullScreenElement || 
+                                           document.msFullscreenElement);
+            
+            // If user prefers fullscreen but we're not in fullscreen, show a prompt
+            if (shouldBeFullscreen && !isCurrentlyFullscreen && isFullscreenSupported()) {
+                console.log('Page regained focus - showing fullscreen reminder');
+                showFullscreenReminder();
+            }
+        }
+
+        function showFullscreenReminder() {
+            console.log('showFullscreenReminder() called');
+            
+            // Create a temporary notification and full-screen tap area
+            let reminderEl = document.getElementById('fullscreenReminder');
+            if (!reminderEl) {
+                console.log('Creating new fullscreen reminder element');
+                reminderEl = document.createElement('div');
+                reminderEl.id = 'fullscreenReminder';
+                reminderEl.style.cssText = `
+                    position: fixed;
+                    top: 70px;
+                    right: 20px;
+                    background: #6f42c1;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    z-index: 1001;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    font-size: 14px;
+                    max-width: 250px;
+                    text-align: center;
+                    pointer-events: none;
+                `;
+                reminderEl.innerHTML = 'Touch anywhere to resume fullscreen ⛶';
+                
+                document.body.appendChild(reminderEl);
+                console.log('Reminder element added to document');
+            } else {
+                console.log('Using existing reminder element');
+            }
+            
+            // Create invisible full-screen tap area
+            let tapArea = document.getElementById('fullscreenTapArea');
+            if (!tapArea) {
+                console.log('Creating tap area');
+                tapArea = document.createElement('div');
+                tapArea.id = 'fullscreenTapArea';
+                tapArea.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 1000;
+                    background: rgba(0,0,0,0);
+                    cursor: pointer;
+                `;
+                
+                // Both click and touch events for maximum compatibility
+                tapArea.addEventListener('click', restoreFullscreenFromTap);
+                tapArea.addEventListener('touchend', restoreFullscreenFromTap);
+                
+                document.body.appendChild(tapArea);
+                console.log('Tap area added to document');
+            }
+            
+            reminderEl.style.opacity = '1';
+            console.log('Reminder should now be visible');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                console.log('Auto-hiding reminder after 5 seconds');
+                hideFullscreenReminder();
+            }, 5000);
+        }
+
+        function restoreFullscreenFromTap(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('User tapped to restore fullscreen');
+            toggleFullscreen().catch(err => {
+                console.log('Fullscreen request failed but may still work:', err);
+                // Don't show error message since it often works anyway
+            });
+            hideFullscreenReminder();
+        }
+
+        function hideFullscreenReminder() {
+            const reminderEl = document.getElementById('fullscreenReminder');
+            const tapArea = document.getElementById('fullscreenTapArea');
+            
+            if (reminderEl) {
+                reminderEl.style.opacity = '0';
+                setTimeout(() => {
+                    if (reminderEl.parentNode) {
+                        reminderEl.parentNode.removeChild(reminderEl);
+                    }
+                }, 300);
+            }
+            
+            if (tapArea && tapArea.parentNode) {
+                tapArea.parentNode.removeChild(tapArea);
+            }
+        }
+
+        function handlePageBlur() {
+            // Optional: Log when page loses focus (for debugging)
+            console.log('Page lost focus');
+        }
+
+        async function playStation(station) {
+            currentStation = station;
+            saveLastPlayed(station);
+            updatePlayingIndicators();
+            
+            try {
+                const audio = document.getElementById('audioPlayer');
+                audio.src = station.url;
+                await audio.play();
+                document.getElementById('nowPlaying').textContent = `♪ ${station.name}`;
+                
+                if (isRetrying) {
+                    isRetrying = false;
+                    if (retryInterval) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error playing station:', error);
+                handlePlaybackError();
+            }
+        }
+
+        function handlePlaybackError() {
+            if (currentStation && isPlaying && !isRetrying) {
+                isRetrying = true;
+                document.getElementById('nowPlaying').textContent = 'Connectivity lost - retrying...';
+                
+                retryInterval = setInterval(async () => {
+                    if (!isPlaying) {
+                        console.log('User paused during retry - stopping retry attempts');
+                        isRetrying = false;
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                        return;
+                    }
+                    
+                    try {
+                        console.log('Retrying to play station:', currentStation.name);
+                        const audio = document.getElementById('audioPlayer');
+                        audio.src = currentStation.url;
+                        await audio.play();
+                        
+                        isRetrying = false;
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        document.getElementById('nowPlaying').textContent = `♪ ${currentStation.name}`;
+                        console.log('Successfully reconnected and resumed playback');
+                        
+                    } catch (retryError) {
+                        console.log('Retry attempt failed, will try again...');
+                    }
+                }, 10000);
+            } else if (currentStation && !isRetrying) {
+                document.getElementById('nowPlaying').textContent = 'Error playing station';
+            }
+        }
+        
+        function togglePlay() {
+            const audio = document.getElementById('audioPlayer');
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                if (currentStation) {
+                    audio.play().catch(() => {
+                        handlePlaybackError();
+                    });
+                } else {
+                    const lastPlayed = loadLastPlayed();
+                    if (lastPlayed) {
+                        playStation(lastPlayed);
+                    }
+                }
+            }
+        }
+        
+        function updatePlayingIndicators() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.classList.remove('playing');
+            });
+
+            if (currentStation) {
+                const playingIndex = favorites.findIndex(fav => 
+                    fav && fav.url === currentStation.url
+                );
+                if (playingIndex !== -1) {
+                    document.querySelector(`[data-index="${playingIndex}"]`).classList.add('playing');
+                }
+            }
+            
+            const stationsGrid = document.getElementById('stationsGrid');
+            if (stationsGrid && currentStations.length > 0) {
+                const stationButtons = stationsGrid.querySelectorAll('.station-btn');
+                if (stationButtons.length > 0) {
+                    stationButtons.forEach(btn => {
+                        btn.classList.remove('playing');
+                    });
+                    
+                    if (currentStation) {
+                        const matchingIndex = currentStations.findIndex(station => 
+                            station && station.url === currentStation.url
+                        );
+                        if (matchingIndex !== -1 && stationButtons[matchingIndex]) {
+                            stationButtons[matchingIndex].classList.add('playing');
+                        }
+                    }
+                }
+            }
+        }
+        
+        function deleteCurrentFavorite() {
+            if (!currentStation) {
+                console.log('No current station to delete');
+                return;
+            }
+
+            const favoriteIndex = favorites.findIndex(fav => 
+                fav && fav.url === currentStation.url
+            );
+            
+            if (favoriteIndex !== -1) {
+                console.log(`Deleting favorite: ${favorites[favoriteIndex].name}`);
+                favorites[favoriteIndex] = null;
+                saveFavorites();
+                loadFavoritesUI();
+                updatePlayingIndicators();
+            } else {
+                console.log('Current station is not in favorites');
+            }
+        }
+
+        function updateBackButton() {
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (navigationStack.length > 0) {
+                const current = navigationStack[navigationStack.length - 1];
+                modalTitle.textContent = current.title;
+            } else {
+                modalTitle.textContent = 'Select Genre';
+            }
+        }
+
+        function goBack() {
+            if (navigationStack.length > 0) {
+                const previous = navigationStack.pop();
+                updateBackButton();
+                
+                if (previous.action === 'showTopLevelGenres') {
+                    showTopLevelGenres();
+                } else if (previous.action === 'showSubGenres') {
+                    showSubGenres(previous.genre);
+                }
+            }
+        }
+
+        function addCurrentToFavorites() {
+            if (!currentStation) {
+                console.log('No current station to add');
+                return;
+            }
+
+            const existingIndex = favorites.findIndex(fav => 
+                fav && fav.url === currentStation.url
+            );
+            
+            if (existingIndex !== -1) {
+                console.log('Station already in favorites');
+                showFeedbackMessage('Station already in favorites');
+                return;
+            }
+
+            let targetIndex = 0;
+            let oldestTime = Date.now();
+
+            for (let i = 0; i < 16; i++) {
+                if (!favorites[i]) {
+                    targetIndex = i;
+                    break;
+                }
+                if (favorites[i].timestamp < oldestTime) {
+                    oldestTime = favorites[i].timestamp;
+                    targetIndex = i;
+                }
+            }
+
+            currentStation.timestamp = Date.now();
+            favorites[targetIndex] = currentStation;
+            saveFavorites();
+            loadFavoritesUI();
+            updatePlayingIndicators();
+            console.log(`Added station "${currentStation.name}" to favorites at slot ${targetIndex}`);
+            
+            showFeedbackMessage(`${currentStation.name} added to Favourites`);
+        }
+
+        function showFeedbackMessage(message) {
+            let feedbackEl = document.getElementById('feedbackMessage');
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = 'feedbackMessage';
+                feedbackEl.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    z-index: 1001;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                `;
+                document.body.appendChild(feedbackEl);
+            }
+            
+            feedbackEl.textContent = message;
+            feedbackEl.style.opacity = '1';
+            
+            setTimeout(() => {
+                feedbackEl.style.opacity = '0';
+            }, 2000);
+        }
+        
+        function loadFavoritesUI() {
+            const favoriteButtons = document.querySelectorAll('.favorite-btn');
+            favoriteButtons.forEach((btn, index) => {
+                if (favorites[index]) {
+                    const station = favorites[index];
+                    
+                    if (station.logo && station.logo.startsWith('http')) {
+                        btn.innerHTML = `
+                            <img src="${station.logo}" class="favorite-logo-img" onerror="this.style.display='none'">
+                            <div class="favorite-name">${truncateText(station.name, 30)}</div>
+                        `;
+                    } else {
+                        btn.innerHTML = `<div class="favorite-name">${truncateText(station.name, 30)}</div>`;
+                    }
+                    
+                    btn.classList.remove('empty');
+                } else {
+                    btn.innerHTML = 'Empty Slot';
+                    btn.classList.add('empty');
+                }
+                btn.classList.remove('playing');
+            });
+        }
+        
+        function playFavorite(index) {
+            if (favorites[index]) {
+                playStation(favorites[index]);
+            }
+        }
+
+        async function fetchAvailableGenres() {
+            const apiUrl = 'https://de1.api.radio-browser.info/json/tags?limit=1000&order=stationcount&reverse=true';
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                console.log('Fetching available genres from API...');
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.contents) {
+                    throw new Error('No contents in proxy response');
+                }
+                
+                const tags = JSON.parse(data.contents);
+                console.log(`Successfully fetched ${tags.length} tags from API`);
+                
+                const organizedGenres = organizeGenres(tags);
+                return organizedGenres;
+                
+            } catch (error) {
+                console.error('Error fetching genres:', error);
+                throw error;
+            }
+        }
+
+        function organizeGenres(tags) {
+            const filteredTags = tags
+                .filter(tag => 
+                    tag.stationcount >= 10 && 
+                    tag.name.length <= 20 && 
+                    !tag.name.includes('http') && 
+                    /^[a-zA-Z0-9\s\-&]+$/.test(tag.name)
+                )
+                .slice(0, 100);
+
+            const groups = {
+                electronic: [],
+                rock: [],
+                pop: [],
+                jazz: [],
+                classical: [],
+                country: [],
+                other: []
+            };
+
+            filteredTags.forEach(tag => {
+                const name = tag.name.toLowerCase();
+                const displayName = tag.name.toUpperCase();
+                
+                if (name.includes('electronic') || name.includes('techno') || name.includes('house') || 
+                    name.includes('trance') || name.includes('drum') || name.includes('dubstep') ||
+                    name.includes('ambient') || name.includes('edm')) {
+                    groups.electronic.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else if (name.includes('rock') || name.includes('metal') || name.includes('punk') ||
+                          name.includes('alternative') || name.includes('grunge') || name.includes('indie rock')) {
+                    groups.rock.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else if (name.includes('pop') || name.includes('top') || name.includes('hits') ||
+                          name.includes('chart') || name.includes('mainstream')) {
+                    groups.pop.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else if (name.includes('jazz') || name.includes('blues') || name.includes('swing')) {
+                    groups.jazz.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else if (name.includes('classical') || name.includes('opera') || name.includes('symphony')) {
+                    groups.classical.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else if (name.includes('country') || name.includes('folk') || name.includes('bluegrass')) {
+                    groups.country.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                } else {
+                    groups.other.push({ id: tag.name, name: displayName, count: tag.stationcount });
+                }
+            });
+
+            Object.keys(groups).forEach(key => {
+                groups[key] = groups[key]
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 15);
+            });
+
+            return groups;
+        }
+        
+        async function fetchStationsPage(genre, page = 0) {
+            const offset = page * 12;
+            const apiUrl = `https://de1.api.radio-browser.info/json/stations/bytag/${encodeURIComponent(genre)}?hidebroken=true&limit=12&offset=${offset}&order=votes&reverse=true`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                console.log(`Fetching stations for genre: ${genre}, page: ${page + 1}, offset: ${offset}`);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.contents) {
+                    throw new Error('No contents in proxy response');
+                }
+                
+                const stations = JSON.parse(data.contents);
+                console.log(`Successfully fetched ${stations.length} stations for ${genre}, page ${page + 1}`);
+                
+                const filteredStations = stations
+                    .filter(station => 
+                        station.url_resolved && 
+                        station.name && 
+                        station.lastcheckok === 1 &&
+                        station.lastchecktime_iso8601 && 
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    )
+                    .sort((a, b) => {
+                        const aHasLogo = a.favicon && a.favicon.startsWith('http');
+                        const bHasLogo = b.favicon && b.favicon.startsWith('http');
+                        
+                        if (aHasLogo && !bHasLogo) return -1;
+                        if (!aHasLogo && bHasLogo) return 1;
+                        
+                        return (b.votes || 0) - (a.votes || 0);
+                    })
+                    .map(station => ({
+                        name: station.name,
+                        url: station.url_resolved,
+                        logo: station.favicon && station.favicon.startsWith('http') ? station.favicon : null,
+                        country: station.country,
+                        bitrate: station.bitrate,
+                        codec: station.codec,
+                        votes: station.votes,
+                        lastChecked: station.lastchecktime_iso8601
+                    }));
+
+                return filteredStations;
+                
+            } catch (error) {
+                console.error(`Error fetching stations for ${genre}, page ${page + 1}:`, error);
+                throw new Error(`Failed to load ${genre} stations: ${error.message}`);
+            }
+        }
+
+        async function searchStationsByName(query) {
+            const apiUrl = `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(query)}?hidebroken=true&limit=50&order=votes&reverse=true`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                console.log(`Searching stations by name: ${query}`);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.contents) {
+                    throw new Error('No contents in proxy response');
+                }
+                
+                const stations = JSON.parse(data.contents);
+                console.log(`Found ${stations.length} stations matching: ${query}`);
+                
+                const filteredStations = stations
+                    .filter(station => 
+                        station.url_resolved && 
+                        station.name && 
+                        station.lastcheckok === 1 &&
+                        station.lastchecktime_iso8601 && 
+                        new Date(station.lastchecktime_iso8601) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    )
+                    .sort((a, b) => {
+                        const aHasLogo = a.favicon && a.favicon.startsWith('http');
+                        const bHasLogo = b.favicon && b.favicon.startsWith('http');
+                        
+                        if (aHasLogo && !bHasLogo) return -1;
+                        if (!aHasLogo && bHasLogo) return 1;
+                        
+                        return (b.votes || 0) - (a.votes || 0);
+                    })
+                    .slice(0, 12)
+                    .map(station => ({
+                        name: station.name,
+                        url: station.url_resolved,
+                        logo: station.favicon && station.favicon.startsWith('http') ? station.favicon : null,
+                        country: station.country,
+                        bitrate: station.bitrate,
+                        codec: station.codec,
+                        votes: station.votes,
+                        lastChecked: station.lastchecktime_iso8601
+                    }));
+
+                return filteredStations;
+                
+            } catch (error) {
+                console.error(`Error searching stations for ${query}:`, error);
+                throw new Error(`Failed to search stations: ${error.message}`);
+            }
+        }
+        
+        function displayCurrentPage() {
+            if (currentStations.length === 0) {
+                document.getElementById('stationsGrid').innerHTML = '<div class="loading">No stations found for this genre</div>';
+                document.getElementById('paginationControls').style.display = 'none';
+                hideModalNowPlaying();
+                return;
+            }
+
+            document.getElementById('paginationControls').style.display = 'flex';
+            document.getElementById('pageInfo').textContent = `Page ${currentPage + 1}`;
+            
+            updateModalNowPlaying();
+            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.classList.toggle('disabled', currentPage === 0);
+            nextBtn.classList.toggle('disabled', currentStations.length < 12);
+
+            const stationsGrid = document.getElementById('stationsGrid');
+            stationsGrid.innerHTML = '';
+            
+            currentStations.forEach((station, index) => {
+                const stationDiv = document.createElement('div');
+                const logoElement = station.logo ? 
+                    `<img src="${station.logo}" class="station-logo-img" onerror="this.style.display='none'">` :
+                    `<div style="font-size: 16px; color: #666;">📻</div>`;
+                
+                stationDiv.className = 'station-btn';
+                stationDiv.onclick = () => playStationFromGrid(index);
+                stationDiv.innerHTML = `
+                    <div style="height: 90%; display: flex; align-items: center; justify-content: center;">
+                        ${logoElement}
+                    </div>
+                    <div class="station-name">${truncateText(station.name, 25)}</div>
+                `;
+                
+                stationsGrid.appendChild(stationDiv);
+            });
+        }
+
+        function updateModalNowPlaying() {
+            const modalNowPlaying = document.getElementById('modalNowPlaying');
+            const modalCurrentStation = document.getElementById('modalCurrentStation');
+            
+            if (currentStation) {
+                modalCurrentStation.textContent = currentStation.name;
+                modalNowPlaying.style.display = 'block';
+            } else {
+                modalNowPlaying.style.display = 'none';
+            }
+        }
+
+        function hideModalNowPlaying() {
+            const modalNowPlaying = document.getElementById('modalNowPlaying');
+            modalNowPlaying.style.display = 'none';
+        }
+        
+        async function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                console.log(`Loading previous page: ${currentPage + 1}`);
+                await loadStationsPage();
+            }
+        }
+
+        async function nextPage() {
+            if (currentStations.length === 12) {
+                currentPage++;
+                console.log(`Loading next page: ${currentPage + 1}`);
+                await loadStationsPage();
+            }
+        }
+        
+        async function loadStationsPage() {
+            document.getElementById('stationsGrid').innerHTML = '<div class="loading">Loading stations...</div>';
+            
+            try {
+                const stations = await fetchStationsPage(currentGenre, currentPage);
+                currentStations = stations;
+                displayCurrentPage();
+            } catch (error) {
+                console.error('Error loading stations page:', error);
+                document.getElementById('stationsGrid').innerHTML = `
+                    <div class="loading">
+                        Unable to load stations.<br>
+                        Error: ${error.message}<br>
+                        <button class="retry-btn" onclick="loadStationsPage()">Retry</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function selectGenre(genre) {
+            console.log('Genre selected:', genre);
+            
+            if (genreGroups[genre] && genreGroups[genre].length > 1) {
+                navigationStack.push({ 
+                    action: 'showTopLevelGenres', 
+                    title: 'Select Genre'
+                });
+                updateBackButton();
+                showSubGenres(genre);
+            } else {
+                loadStations(genre);
+            }
+        }
+        
+        function showSubGenres(topGenre) {
+            document.getElementById('paginationControls').style.display = 'none';
+            hideModalNowPlaying();
+            
+            const subGenreList = genreGroups[topGenre] || [];
+            const stationsGrid = document.getElementById('stationsGrid');
+            stationsGrid.innerHTML = '';
+
+            subGenreList.forEach((subGenre, index) => {
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'genre-btn';
+                genreDiv.onclick = () => selectSubGenre(topGenre, index);
+                genreDiv.textContent = subGenre.name;
+                stationsGrid.appendChild(genreDiv);
+            });
+        }
+
+        function selectSubGenre(topGenre, index) {
+            const subGenreList = genreGroups[topGenre] || [];
+            if (index < subGenreList.length) {
+                const selectedGenre = subGenreList[index];
+                console.log('Sub-genre selected:', selectedGenre.id);
+                loadStations(selectedGenre.id);
+            }
+        }
+        
+        function showTopLevelGenres() {
+            document.getElementById('paginationControls').style.display = 'none';
+            
+            if (Object.keys(genreGroups).length === 0) {
+                document.getElementById('stationsGrid').innerHTML = '<div class="loading">Loading genres...</div>';
+                loadGenres().then(() => {
+                    displayTopLevelGenres();
+                }).catch(error => {
+                    console.error('Failed to load genres:', error);
+                    document.getElementById('stationsGrid').innerHTML = `
+                        <div class="loading">
+                            Unable to load genres.<br>
+                            Error: ${error.message}<br>
+                            <button class="retry-btn" onclick="showTopLevelGenres()">Retry</button>
+                        </div>
+                    `;
+                });
+            } else {
+                displayTopLevelGenres();
+            }
+        }
+
+        function displayTopLevelGenres() {
+            const searchHtml = `
+                <div class="search-container">
+                    <input type="text" id="stationSearchInput" placeholder="Search for station name...">
+                    <button id="searchStationBtn">Search</button>
+                </div>
+            `;
+
+            const mainGenres = Object.keys(genreGroups).filter(key => genreGroups[key].length > 0);
+            
+            hideModalNowPlaying();
+            
+            const stationsGrid = document.getElementById('stationsGrid');
+            stationsGrid.innerHTML = searchHtml;
+            
+            mainGenres.forEach(genre => {
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'genre-btn';
+                genreDiv.onclick = () => selectGenre(genre);
+                genreDiv.textContent = genre.toUpperCase();
+                stationsGrid.appendChild(genreDiv);
+            });
+            
+            const searchInput = document.getElementById('stationSearchInput');
+            const searchBtn = document.getElementById('searchStationBtn');
+            
+            if (searchInput && searchBtn) {
+                const performSearch = async () => {
+                    const query = searchInput.value.trim();
+                    if (query.length < 2) {
+                        alert('Please enter at least 2 characters');
+                        return;
+                    }
+                    
+                    document.getElementById('stationsGrid').innerHTML = '<div class="loading">Searching stations...</div>';
+                    
+                    try {
+                        const stations = await searchStationsByName(query);
+                        currentStations = stations;
+                        currentGenre = `search:${query}`;
+                        currentPage = 0;
+                        
+                        navigationStack.push({ 
+                            action: 'showTopLevelGenres', 
+                            title: 'Select Genre'
+                        });
+                        document.getElementById('modalTitle').textContent = `Search: "${query}"`;
+                        
+                        displayCurrentPage();
+                    } catch (error) {
+                        console.error('Search error:', error);
+                        document.getElementById('stationsGrid').innerHTML = `
+                            <div class="loading">
+                                Search failed: ${error.message}<br>
+                                <button class="retry-btn" onclick="showTopLevelGenres()">Back to Genres</button>
+                            </div>
+                        `;
+                    }
+                };
+                
+                searchBtn.addEventListener('click', performSearch);
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+            
+            navigationStack = [];
+            updateBackButton();
+        }
+
+        async function loadGenres() {
+            if (Object.keys(genreGroups).length === 0) {
+                try {
+                    genreGroups = await fetchAvailableGenres();
+                    console.log('Loaded genre groups:', genreGroups);
+                } catch (error) {
+                    console.error('Failed to load genres:', error);
+                    throw error;
+                }
+            }
+        }
+        
+        async function loadStations(genre) {
+            navigationStack.push({ 
+                action: 'showSubGenres', 
+                genre: getCurrentTopGenre(genre),
+                title: `${getCurrentTopGenre(genre).toUpperCase()} Sub-Genres`
+            });
+            updateBackButton();
+            
+            currentGenre = genre;
+            currentPage = 0;
+            await loadStationsPage();
+        }
+
+        function getCurrentTopGenre(subGenre) {
+            for (const [topGenre, subGenres] of Object.entries(genreGroups)) {
+                if (subGenres.some(sg => sg.id === subGenre)) {
+                    return topGenre;
+                }
+            }
+            return 'other';
+        }
+        
+        function playStationFromGrid(index) {
+            if (currentStations[index]) {
+                playStation(currentStations[index]);
+                displayCurrentPage();
+                console.log('Playing station, staying on selection screen');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up radio app...');
+            
+            favorites = loadFavorites();
+            loadFavoritesUI();
+            
+            const searchBtn = document.getElementById('searchBtn');
+            const searchModal = document.getElementById('searchModal');
+            const closeModal = document.getElementById('closeModal');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const addBtn = document.getElementById('addBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const audio = document.getElementById('audioPlayer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const modalAddBtn = document.getElementById('modalAddBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const supportBtn = document.getElementById('supportBtn');
+            
+            audio.addEventListener('play', function() {
+                isPlaying = true;
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'block';
+            });
+            
+            audio.addEventListener('pause', function() {
+                isPlaying = false;
+                playBtn.style.display = 'block';
+                pauseBtn.style.display = 'none';
+                
+                if (isRetrying) {
+                    isRetrying = false;
+                    if (retryInterval) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                    }
+                    console.log('User paused - stopping retry attempts');
+                }
+                
+                if (currentStation) {
+                    document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                }
+            });
+            
+            let lastErrorTime = 0;
+            audio.addEventListener('error', function(e) {
+                const now = Date.now();
+                if (now - lastErrorTime < 15000) {
+                    console.log('Error event debounced');
+                    return;
+                }
+                lastErrorTime = now;
+                
+                console.log('Audio error detected:', e);
+                if (isPlaying && currentStation) {
+                    handlePlaybackError();
+                }
+                isPlaying = false;
+                playBtn.style.display = 'block';
+                pauseBtn.style.display = 'none';
+            });
+
+            let stallCount = 0;
+            audio.addEventListener('stalled', function() {
+                stallCount++;
+                console.log(`Audio stalled (count: ${stallCount})`);
+                if (stallCount >= 3 && isPlaying && currentStation) {
+                    console.log('Multiple stalls detected - treating as connectivity issue');
+                    handlePlaybackError();
+                    stallCount = 0;
+                }
+            });
+
+            audio.addEventListener('loadstart', function() {
+                stallCount = 0;
+            });
+
+            audio.addEventListener('suspend', function() {
+                console.log('Audio suspended (often due to autoplay restrictions)');
+            });
+            
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    console.log('Search button clicked!');
+                    searchModal.style.display = 'block';
+                    loadGenres().then(() => {
+                        showTopLevelGenres();
+                    });
+                });
+            }
+            
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    if (navigationStack.length > 0) {
+                        goBack();
+                    } else {
+                        searchModal.style.display = 'none';
+                        navigationStack = [];
+                        updateBackButton();
+                    }
+                });
+            }
+            
+            if (playBtn) {
+                playBtn.addEventListener('click', togglePlay);
+            }
+            
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', togglePlay);
+            }
+            
+            if (addBtn) {
+                addBtn.addEventListener('click', addCurrentToFavorites);
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    console.log('Delete button clicked');
+                    deleteCurrentFavorite();
+                });
+            }
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    console.log('Prev button clicked');
+                    prevPage();
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    console.log('Next button clicked');
+                    nextPage();
+                });
+            }
+            
+            if (modalAddBtn) {
+                modalAddBtn.addEventListener('click', function() {
+                    console.log('Modal add button clicked');
+                    addCurrentToFavorites();
+                });
+            }
+            
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function() {
+                    console.log('Fullscreen button clicked');
+                    toggleFullscreen().catch(err => {
+                        // Remove the error notification - it works anyway
+                        console.log('Fullscreen request had issues but may have worked');
+                    });
+                });
+            }
+
+            if (supportBtn) {
+                supportBtn.addEventListener('click', function() {
+                    console.log('Support button clicked');
+                    // Replace with your actual Ko-fi or support URL
+                    window.open('https://ko-fi.com/yourname', '_blank');
+                });
+            }
+
+            document.querySelectorAll('.favorite-btn').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    playFavorite(index);
+                });
+            });
+            
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('msfullscreenchange', updateFullscreenButton);
+            
+            if (fullscreenBtn && !isFullscreenSupported()) {
+                fullscreenBtn.style.display = 'none';
+                console.log('Fullscreen API not supported, hiding button');
+            }
+            
+            window.addEventListener('resize', handleViewportResize);
+            window.addEventListener('orientationchange', () => {
+                console.log('=== ORIENTATION CHANGE EVENT FIRED ===');
+                setTimeout(handleViewportResize, 100);
+            });
+            
+            // Handle page focus/blur events for fullscreen restoration
+            window.addEventListener('focus', function() {
+                console.log('=== WINDOW FOCUS EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            window.addEventListener('blur', function() {
+                console.log('=== WINDOW BLUR EVENT FIRED ===');
+                handlePageBlur();
+            });
+            
+            // Try document focus/blur as well
+            document.addEventListener('focus', function() {
+                console.log('=== DOCUMENT FOCUS EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            document.addEventListener('blur', function() {
+                console.log('=== DOCUMENT BLUR EVENT FIRED ===');
+                handlePageBlur();
+            });
+            
+            // Also handle visibility change (covers more browser scenarios)
+            document.addEventListener('visibilitychange', function() {
+                console.log('=== VISIBILITY CHANGE EVENT FIRED ===');
+                console.log('document.hidden:', document.hidden);
+                if (!document.hidden) {
+                    console.log('Page became visible - calling handlePageFocus()');
+                    handlePageFocus();
+                } else {
+                    console.log('Page became hidden');
+                }
+            });
+            
+            // Try page show/hide events
+            window.addEventListener('pageshow', function() {
+                console.log('=== PAGE SHOW EVENT FIRED ===');
+                handlePageFocus();
+            });
+            
+            window.addEventListener('pagehide', function() {
+                console.log('=== PAGE HIDE EVENT FIRED ===');
+            });
+            
+            // Try beforeunload/unload
+            window.addEventListener('beforeunload', function() {
+                console.log('=== BEFORE UNLOAD EVENT FIRED ===');
+            });
+            
+            // Try resize (sometimes triggered when switching)
+            window.addEventListener('resize', function() {
+                console.log('=== RESIZE EVENT FIRED ===');
+                handleViewportResize();
+            });
+            
+            // Try mouse/pointer events that might indicate user return
+            document.addEventListener('mouseenter', function() {
+                console.log('=== MOUSE ENTER EVENT FIRED ===');
+            });
+            
+            document.addEventListener('mousemove', function() {
+                console.log('=== MOUSE MOVE EVENT FIRED ===');
+            }, { once: true }); // Only log the first one to avoid spam
+            
+            document.addEventListener('click', function() {
+                console.log('=== CLICK EVENT FIRED ===');
+            }, { once: true }); // Only log the first one
+            
+            // Try touch events for mobile
+            document.addEventListener('touchstart', function() {
+                console.log('=== TOUCH START EVENT FIRED ===');
+            }, { once: true });
+            
+            console.log('=== ALL EVENT LISTENERS REGISTERED ===');
+            
+            handleViewportResize();
+            
+            // Check if user prefers fullscreen and show reminder if needed (using test button logic)
+            const shouldShowFullscreenReminder = loadFullscreenPreference();
+            console.log('=== PAGE LOAD CHECK ===');
+            console.log('shouldShowFullscreenReminder:', shouldShowFullscreenReminder);
+            console.log('isFullscreenSupported():', isFullscreenSupported());
+            
+            if (shouldShowFullscreenReminder && isFullscreenSupported()) {
+                console.log('PAGE LOAD CONDITIONS MET - will show reminder in 1 second');
+                // Show reminder after a brief delay to ensure page is loaded
+                setTimeout(() => {
+                    console.log('PAGE LOAD TIMEOUT - calling showFullscreenReminder()');
+                    showFullscreenReminder();
+                }, 1000);
+            } else {
+                console.log('PAGE LOAD CONDITIONS NOT MET - no reminder on startup');
+            }
+            
+            const lastPlayed = loadLastPlayed();
+            if (lastPlayed) {
+                console.log('Auto-resuming last played station:', lastPlayed.name);
+                currentStation = lastPlayed;
+                updatePlayingIndicators();
+                document.getElementById('nowPlaying').textContent = `♪ ${lastPlayed.name}`;
+                
+                const attemptAutoResume = () => {
+                    const audio = document.getElementById('audioPlayer');
+                    if (!audio) {
+                        console.log('Audio element not ready, retrying...');
+                        setTimeout(attemptAutoResume, 500);
+                        return;
+                    }
+                    
+                    console.log('Audio element ready, attempting to play...');
+                    audio.src = lastPlayed.url;
+                    
+                    setTimeout(() => {
+                        audio.play().then(() => {
+                            console.log('Auto-resume successful');
+                        }).catch(error => {
+                            console.log('Auto-resume blocked by browser (this is normal):', error.message);
+                        });
+                    }, 100);
+                };
+                
+                attemptAutoResume();
+            }
+            
+            console.log('Radio app setup complete');
+        });
+        
+        console.log('JavaScript file loaded completely');
+    </script>
+</body>
+</html>

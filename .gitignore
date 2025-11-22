@@ -1,0 +1,42 @@
+# Android Studio
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Gradle
+.gradle/
+build/
+
+# Keystore files - NEVER commit these!
+*.jks
+*.keystore
+
+# APK and AAB files - upload to releases instead
+*.apk
+*.aab
+
+# Android build outputs
+android/app/build/
+android/build/
+android/.gradle/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# IDE files
+.vscode/
+*.sublime-*
