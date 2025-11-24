@@ -492,6 +492,7 @@
         let genreGroups = {};
         let retryInterval = null;
         let isRetrying = false;
+        let userWantsToListen = false;  // Track user intent separate from playback state
         
         function loadFavorites() {
             const saved = localStorage.getItem('carRadioFavorites');
@@ -760,14 +761,17 @@
             currentStation = station;
             saveLastPlayed(station);
             updatePlayingIndicators();
-            
+            userWantsToListen = true;  // User explicitly wants to listen
+
             try {
                 const audio = document.getElementById('audioPlayer');
                 audio.src = station.url;
                 await audio.play();
                 document.getElementById('nowPlaying').textContent = `♪ ${station.name}`;
-                
+
+                // Successfully playing - stop any retry attempts
                 if (isRetrying) {
+                    console.log('Playback successful - stopping retry attempts');
                     isRetrying = false;
                     if (retryInterval) {
                         clearInterval(retryInterval);
@@ -781,46 +785,77 @@
         }
 
         function handlePlaybackError() {
-            if (currentStation && isPlaying && !isRetrying) {
+            // Start retry if we have a station and user wants to listen (not manually paused)
+            if (currentStation && userWantsToListen && !isRetrying) {
                 isRetrying = true;
-                document.getElementById('nowPlaying').textContent = 'Connectivity lost - retrying...';
-                
-                retryInterval = setInterval(async () => {
-                    if (!isPlaying) {
-                        console.log('User paused during retry - stopping retry attempts');
-                        isRetrying = false;
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                        document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
-                        return;
-                    }
-                    
-                    try {
-                        console.log('Retrying to play station:', currentStation.name);
-                        const audio = document.getElementById('audioPlayer');
-                        audio.src = currentStation.url;
-                        await audio.play();
-                        
-                        isRetrying = false;
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                        document.getElementById('nowPlaying').textContent = `♪ ${currentStation.name}`;
-                        console.log('Successfully reconnected and resumed playback');
-                        
-                    } catch (retryError) {
-                        console.log('Retry attempt failed, will try again...');
-                    }
-                }, 10000);
-            } else if (currentStation && !isRetrying) {
+                document.getElementById('nowPlaying').textContent = 'Connecting to station - retrying...';
+
+                // Try immediately first
+                console.log('Connection error detected - starting persistent retry for:', currentStation.name);
+                attemptPlayback();
+
+                // Then keep trying every 5 seconds until it works or user pauses
+                retryInterval = setInterval(attemptPlayback, 5000);
+            } else if (currentStation && !isRetrying && !userWantsToListen) {
                 document.getElementById('nowPlaying').textContent = 'Error playing station';
+            }
+        }
+
+        async function attemptPlayback() {
+            // Stop retrying if user has paused
+            if (!userWantsToListen) {
+                console.log('User paused during retry - stopping retry attempts');
+                isRetrying = false;
+                if (retryInterval) {
+                    clearInterval(retryInterval);
+                    retryInterval = null;
+                }
+                if (currentStation) {
+                    document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
+                }
+                return;
+            }
+
+            if (!currentStation) {
+                console.log('No station to retry');
+                isRetrying = false;
+                if (retryInterval) {
+                    clearInterval(retryInterval);
+                    retryInterval = null;
+                }
+                return;
+            }
+
+            try {
+                console.log('Attempting playback:', currentStation.name);
+                const audio = document.getElementById('audioPlayer');
+                audio.src = currentStation.url;
+                await audio.play();
+
+                // Success! Stop retrying
+                isRetrying = false;
+                if (retryInterval) {
+                    clearInterval(retryInterval);
+                    retryInterval = null;
+                }
+                document.getElementById('nowPlaying').textContent = `♪ ${currentStation.name}`;
+                console.log('Successfully connected and playing');
+
+            } catch (retryError) {
+                console.log('Playback attempt failed, will retry...');
+                document.getElementById('nowPlaying').textContent = 'Connecting to station - retrying...';
             }
         }
         
         function togglePlay() {
             const audio = document.getElementById('audioPlayer');
             if (isPlaying) {
+                // User explicitly paused
+                userWantsToListen = false;
                 audio.pause();
             } else {
+                // User wants to play
+                userWantsToListen = true;
                 if (currentStation) {
                     audio.play().catch(() => {
                         handlePlaybackError();
@@ -1514,16 +1549,7 @@
                 isPlaying = false;
                 playBtn.style.display = 'block';
                 pauseBtn.style.display = 'none';
-                
-                if (isRetrying) {
-                    isRetrying = false;
-                    if (retryInterval) {
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                    }
-                    console.log('User paused - stopping retry attempts');
-                }
-                
+
                 if (currentStation) {
                     document.getElementById('nowPlaying').textContent = `⏸ ${currentStation.name}`;
                 }
@@ -1537,21 +1563,19 @@
                     return;
                 }
                 lastErrorTime = now;
-                
+
                 console.log('Audio error detected:', e);
-                if (isPlaying && currentStation) {
+                // Only trigger retry if user wants to listen
+                if (userWantsToListen && currentStation) {
                     handlePlaybackError();
                 }
-                isPlaying = false;
-                playBtn.style.display = 'block';
-                pauseBtn.style.display = 'none';
             });
 
             let stallCount = 0;
             audio.addEventListener('stalled', function() {
                 stallCount++;
                 console.log(`Audio stalled (count: ${stallCount})`);
-                if (stallCount >= 3 && isPlaying && currentStation) {
+                if (stallCount >= 3 && userWantsToListen && currentStation) {
                     console.log('Multiple stalls detected - treating as connectivity issue');
                     handlePlaybackError();
                     stallCount = 0;
@@ -1758,9 +1782,10 @@
             if (lastPlayed) {
                 console.log('Auto-resuming last played station:', lastPlayed.name);
                 currentStation = lastPlayed;
+                userWantsToListen = true;  // User wants auto-resume
                 updatePlayingIndicators();
                 document.getElementById('nowPlaying').textContent = `♪ ${lastPlayed.name}`;
-                
+
                 const attemptAutoResume = () => {
                     const audio = document.getElementById('audioPlayer');
                     if (!audio) {
@@ -1768,19 +1793,21 @@
                         setTimeout(attemptAutoResume, 500);
                         return;
                     }
-                    
+
                     console.log('Audio element ready, attempting to play...');
                     audio.src = lastPlayed.url;
-                    
+
                     setTimeout(() => {
                         audio.play().then(() => {
                             console.log('Auto-resume successful');
                         }).catch(error => {
-                            console.log('Auto-resume blocked by browser (this is normal):', error.message);
+                            console.log('Auto-resume failed (possibly no connection yet):', error.message);
+                            // Start persistent retry - connection may not be available yet
+                            handlePlaybackError();
                         });
                     }, 100);
                 };
-                
+
                 attemptAutoResume();
             }
             

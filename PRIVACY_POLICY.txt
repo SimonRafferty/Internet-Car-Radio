@@ -1,0 +1,119 @@
+PRIVACY POLICY FOR INTERNET CAR RADIO
+
+Last Updated: November 24, 2025
+
+1. INTRODUCTION
+
+Internet Car Radio ("we", "our", "the app") is committed to protecting your privacy. This privacy policy explains how our application handles information when you use our internet radio streaming service.
+
+2. INFORMATION WE COLLECT
+
+Internet Car Radio collects minimal information, stored locally on your device only:
+
+a) Favorite Stations: Up to 16 radio station preferences you save
+b) Last Played Station: The most recent station you listened to
+c) Fullscreen Preference: Your display preference setting
+
+NO personal information (name, email, phone number, location, etc.) is collected.
+NO user accounts are created or required.
+NO analytics or tracking data is collected.
+
+3. HOW WE USE INFORMATION
+
+All data is stored locally on your device using browser localStorage and is used solely to:
+- Remember your favorite radio stations between app sessions
+- Auto-resume your last played station when you reopen the app
+- Remember your fullscreen display preference
+
+This data NEVER leaves your device and is NOT transmitted to any servers we control.
+
+4. THIRD-PARTY SERVICES
+
+The app uses the following third-party services:
+
+a) Radio Browser API (radio-browser.info)
+   - Used to browse and search available internet radio stations
+   - Subject to their privacy policy: https://www.radio-browser.info/
+   - We do not control what data they may collect
+
+b) AllOrigins CORS Proxy (allorigins.win)
+   - Used as a technical intermediary to access the Radio Browser API
+   - Handles API requests on behalf of the app
+   - Subject to their privacy policy
+
+c) Radio Station Streams
+   - When you play a station, you connect directly to that station's streaming server
+   - Each station may have its own privacy practices
+   - We do not control or have access to any data collected by individual stations
+
+5. DATA STORAGE AND SECURITY
+
+All user preferences are stored locally in your device's browser storage (localStorage). This data:
+- Remains on your device only
+- Is not backed up to any cloud service by us
+- Can be cleared by clearing your browser/app data
+- Is not accessible to us or any third parties
+
+6. INTERNET PERMISSIONS
+
+The app requires internet access to:
+- Fetch lists of available radio stations from Radio Browser API
+- Stream audio from selected radio stations
+- No other internet activity is performed
+
+7. CHILDREN'S PRIVACY
+
+Our app does not knowingly collect any information from children under 13 years of age. The app is designed to be safe for all ages as it collects no personal information.
+
+8. DATA DELETION
+
+To delete all data stored by Internet Car Radio:
+- Clear your browser/app data through your device settings, OR
+- Uninstall the application
+
+This will remove all saved favorites, preferences, and settings.
+
+9. CHANGES TO THIS PRIVACY POLICY
+
+We may update this privacy policy from time to time. Any changes will be reflected with an updated "Last Updated" date at the top of this document.
+
+10. YOUR RIGHTS
+
+You have the right to:
+- Know what data is stored (listed in Section 2)
+- Delete all stored data at any time (see Section 8)
+- Stop using the app at any time
+
+11. NO DATA SHARING OR SELLING
+
+We do NOT:
+- Share your data with third parties
+- Sell your data to anyone
+- Use your data for advertising
+- Track your usage patterns
+- Create user profiles
+
+12. CONTACT INFORMATION
+
+If you have questions about this privacy policy or the app's data practices, please contact:
+
+Simon Rafferty
+Simon1@psi-design.co.uk
+http://www.psi-design.co.uk
+
+13. CONSENT
+
+By using Internet Car Radio, you consent to this privacy policy and the minimal local data storage described herein.
+
+---
+
+SUMMARY IN PLAIN ENGLISH:
+
+Internet Car Radio is a simple radio streaming app that:
+✓ Stores your favorite stations locally on your device only
+✓ Remembers your last played station
+✓ Does NOT collect any personal information
+✓ Does NOT send your data anywhere
+✓ Uses third-party services only to fetch station lists and stream audio
+
+Your privacy is respected. We collect the absolute minimum needed to make the app work.
